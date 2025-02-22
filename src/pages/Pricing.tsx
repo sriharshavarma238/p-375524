@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -26,18 +25,16 @@ const Pricing = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        throw new Error(error.message);
       }
 
-      // Log the response for debugging
-      console.log('Checkout session created:', data);
-
-      // Redirect to Stripe Checkout
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received from Stripe');
+      if (!data?.url) {
+        console.error('No checkout URL in response:', data);
+        throw new Error('No checkout URL received from server');
       }
+
+      console.log('Redirecting to checkout URL:', data.url);
+      window.location.href = data.url;
     } catch (error: any) {
       console.error('Checkout error:', error);
       toast({

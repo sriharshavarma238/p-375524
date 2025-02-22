@@ -17,22 +17,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface PlanInfo {
-  name: string;
-  price: number;
-}
-
-const PLANS: Record<string, PlanInfo> = {
-  starter: {
-    name: 'Starter Plan',
-    price: 9900, // $99.00
-  },
-  professional: {
-    name: 'Professional Plan',
-    price: 19900, // $199.00
-  },
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -40,34 +24,46 @@ serve(async (req) => {
   }
 
   try {
+    // Validate request method
+    if (req.method !== 'POST') {
+      throw new Error(`HTTP method ${req.method} is not allowed`);
+    }
+
+    // Parse and validate request body
     const { planId, origin } = await req.json();
-    console.log('Received request with:', { planId, origin });
+    console.log('Request received:', { planId, origin });
 
-    // Validate inputs
     if (!planId || !origin) {
-      throw new Error('Missing required parameters: planId and origin are required');
+      throw new Error('Missing required parameters: planId and origin');
     }
 
-    const plan = PLANS[planId];
+    // Validate plan
+    const plans = {
+      starter: {
+        name: 'Starter Plan',
+        price: 9900,
+      },
+      professional: {
+        name: 'Professional Plan',
+        price: 19900,
+      },
+    };
+
+    const plan = plans[planId];
     if (!plan) {
-      throw new Error(`Invalid plan selected: ${planId}`);
+      throw new Error(`Invalid plan: ${planId}`);
     }
 
-    // Ensure origin is a valid URL
-    let baseUrl: string;
-    try {
-      baseUrl = new URL(origin).origin;
-    } catch (e) {
-      throw new Error('Invalid origin URL provided');
-    }
-
-    console.log('Creating product for plan:', plan.name);
+    // Create Stripe product
+    console.log('Creating Stripe product...');
     const product = await stripe.products.create({
       name: plan.name,
       description: `Monthly subscription for ${plan.name}`,
     });
+    console.log('Product created:', product.id);
 
-    console.log('Creating price for product:', product.id);
+    // Create Stripe price
+    console.log('Creating Stripe price...');
     const price = await stripe.prices.create({
       product: product.id,
       unit_amount: plan.price,
@@ -76,10 +72,11 @@ serve(async (req) => {
         interval: 'month',
       },
     });
+    console.log('Price created:', price.id);
 
-    console.log('Creating checkout session with price:', price.id);
+    // Create checkout session
+    console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       line_items: [
         {
           price: price.id,
@@ -87,42 +84,32 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/pricing`,
-      automatic_tax: { enabled: true },
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/pricing`,
+      billing_address_collection: 'required',
+      payment_method_types: ['card'],
       customer_creation: 'always',
     });
-
-    console.log('Checkout session created successfully:', session.id);
+    console.log('Checkout session created:', session.id);
 
     return new Response(
-      JSON.stringify({
-        sessionId: session.id,
-        url: session.url,
-      }),
+      JSON.stringify({ url: session.url }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
-      },
+      }
     );
   } catch (error) {
-    console.error('Error in checkout process:', error);
-
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    const errorResponse = {
-      error: errorMessage,
-      details: error instanceof Error ? error.stack : undefined,
-    };
-
+    console.error('Error:', error);
+    
     return new Response(
-      JSON.stringify(errorResponse),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
-      },
+      }
     );
   }
 });
