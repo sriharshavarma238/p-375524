@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -37,7 +36,6 @@ export const ChatInterface = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Add personalized welcome message
       setMessages([
         {
           id: '1',
@@ -65,7 +63,6 @@ export const ChatInterface = () => {
 
   const handleQuizAnswer = (answer: string) => {
     addUserMessage(answer);
-    // Simulate AI processing
     setIsProcessing(true);
     setTimeout(() => {
       const recommendation = `Based on your answer, I recommend our ${answer === 'Improve productivity' ? 'Enterprise Solutions' : 'Professional Services'} package! Would you like to learn more about it? 😊`;
@@ -105,25 +102,39 @@ export const ChatInterface = () => {
     }
   };
 
-  const handleUserMessage = (message: string) => {
+  const handleUserMessage = async (message: string) => {
     setIsProcessing(true);
-    const lowerMessage = message.toLowerCase();
 
-    // Simulate AI processing
-    setTimeout(() => {
-      let response = "";
-      if (lowerMessage.includes('price') || lowerMessage.includes('cost')) {
-        response = "Our pricing starts at $99/month for basic features. Would you like to see our detailed pricing page? 💰";
-      } else if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-        response = "Based on your interests, I think you'd love our Enterprise package! It includes AI-powered analytics and 24/7 support. Would you like to learn more? 😊";
-      } else if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
-        response = "I'd be happy to help! Are you experiencing any specific issues? I can assist with technical problems, billing questions, or general inquiries. 🛟";
-      } else {
-        response = "I understand you're interested in learning more. Could you tell me what specific aspect of our services you'd like to explore? 🤔";
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-with-ai', {
+        body: {
+          messages: [
+            ...messages
+              .filter(m => m.type !== 'bot' || !m.category)
+              .map(m => ({
+                role: m.type === 'user' ? 'user' : 'assistant',
+                content: m.content
+              })),
+            { role: 'user', content: message }
+          ]
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.response) {
+        addBotMessage(data.response);
       }
-      addBotMessage(response);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Sorry, I couldn't process your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsProcessing(false);
-    }, 1500);
+    }
   };
 
   const handleSend = () => {
@@ -143,7 +154,6 @@ export const ChatInterface = () => {
           description: "Listening to your command...",
         });
         
-        // Simulate voice recognition
         setTimeout(() => {
           stream.getTracks().forEach(track => track.stop());
           setIsRecording(false);
@@ -167,7 +177,6 @@ export const ChatInterface = () => {
 
   return (
     <>
-      {/* Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-4 right-4 bg-black text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl ${
@@ -189,13 +198,11 @@ export const ChatInterface = () => {
         </svg>
       </button>
 
-      {/* Chat Interface */}
       <div
         className={`fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-lg shadow-xl flex flex-col transition-all duration-300 ${
           isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
         }`}
       >
-        {/* Chat Header */}
         <div className="p-4 border-b flex justify-between items-center bg-black text-white rounded-t-lg">
           <h3 className="font-semibold">AI Assistant</h3>
           <button
@@ -206,7 +213,6 @@ export const ChatInterface = () => {
           </button>
         </div>
 
-        {/* Chat Messages */}
         <div className="flex-1 p-4 overflow-y-auto">
           {messages.map((message) => (
             <div
@@ -249,7 +255,6 @@ export const ChatInterface = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input */}
         <div className="p-4 border-t">
           <div className="flex items-center gap-2">
             <button
