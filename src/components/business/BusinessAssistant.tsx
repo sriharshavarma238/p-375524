@@ -56,8 +56,9 @@ export const BusinessAssistant = () => {
   }, []);
 
   const startVoiceRecognition = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    
+    if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       
       recognition.continuous = false;
@@ -71,13 +72,13 @@ export const BusinessAssistant = () => {
         });
       };
       
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInputMessage(transcript);
         handleUserMessage(transcript);
       };
       
-      recognition.onerror = (event) => {
+      recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
         toast({
