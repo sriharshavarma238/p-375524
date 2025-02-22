@@ -2,6 +2,7 @@
 import React from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Link } from "react-router-dom";
 
 const Blog = () => {
   return (
@@ -22,7 +23,12 @@ const Blog = () => {
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">March 15, 2024</span>
-                <button className="text-primary hover:text-primary/80">Read More →</button>
+                <Link 
+                  to="/blog/ai-in-finance" 
+                  className="text-primary hover:text-primary/80"
+                >
+                  Read More →
+                </Link>
               </div>
             </article>
 
@@ -33,7 +39,12 @@ const Blog = () => {
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">March 10, 2024</span>
-                <button className="text-primary hover:text-primary/80">Read More →</button>
+                <Link 
+                  to="/blog/smart-budgeting" 
+                  className="text-primary hover:text-primary/80"
+                >
+                  Read More →
+                </Link>
               </div>
             </article>
 
@@ -44,7 +55,12 @@ const Blog = () => {
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">March 5, 2024</span>
-                <button className="text-primary hover:text-primary/80">Read More →</button>
+                <Link 
+                  to="/blog/cybersecurity" 
+                  className="text-primary hover:text-primary/80"
+                >
+                  Read More →
+                </Link>
               </div>
             </article>
           </div>
