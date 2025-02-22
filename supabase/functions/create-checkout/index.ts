@@ -4,10 +4,10 @@ import Stripe from "https://esm.sh/stripe@12.4.0?target=deno";
 
 const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
 if (!stripeKey) {
-  console.error('STRIPE_SECRET_KEY is not set');
+  throw new Error('STRIPE_SECRET_KEY is not set');
 }
 
-const stripe = new Stripe(stripeKey || '', {
+const stripe = new Stripe(stripeKey, {
   httpClient: Stripe.createFetchHttpClient(),
   apiVersion: '2023-10-16',
 });
@@ -41,26 +41,33 @@ serve(async (req) => {
 
   try {
     const { planId, origin } = await req.json();
-    console.log('Received request for plan:', planId);
-    console.log('Origin:', origin);
+    console.log('Received request with:', { planId, origin });
+
+    // Validate inputs
+    if (!planId || !origin) {
+      throw new Error('Missing required parameters: planId and origin are required');
+    }
 
     const plan = PLANS[planId];
     if (!plan) {
       throw new Error(`Invalid plan selected: ${planId}`);
     }
 
-    if (!origin) {
-      throw new Error('Origin URL is required');
+    // Ensure origin is a valid URL
+    let baseUrl: string;
+    try {
+      baseUrl = new URL(origin).origin;
+    } catch (e) {
+      throw new Error('Invalid origin URL provided');
     }
 
-    console.log('Creating checkout session for plan:', plan.name);
-
-    // Create a product for this purchase
+    console.log('Creating product for plan:', plan.name);
     const product = await stripe.products.create({
       name: plan.name,
+      description: `Monthly subscription for ${plan.name}`,
     });
 
-    // Create a price for the product
+    console.log('Creating price for product:', product.id);
     const price = await stripe.prices.create({
       product: product.id,
       unit_amount: plan.price,
@@ -70,7 +77,7 @@ serve(async (req) => {
       },
     });
 
-    // Create the checkout session
+    console.log('Creating checkout session with price:', price.id);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -80,34 +87,34 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pricing`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/pricing`,
       automatic_tax: { enabled: true },
       customer_creation: 'always',
     });
 
-    console.log('Checkout session created:', session.id);
+    console.log('Checkout session created successfully:', session.id);
 
     return new Response(
-      JSON.stringify({ 
-        sessionId: session.id, 
+      JSON.stringify({
+        sessionId: session.id,
         url: session.url,
       }),
       {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
         },
         status: 200,
       },
     );
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    
+    console.error('Error in checkout process:', error);
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorResponse = {
       error: errorMessage,
-      details: error instanceof Error ? error.stack : undefined
+      details: error instanceof Error ? error.stack : undefined,
     };
 
     return new Response(
