@@ -10,13 +10,17 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { messages, language = 'en' } = await req.json();
+
+    // Validate input
+    if (!Array.isArray(messages) || messages.length === 0) {
+      throw new Error('Invalid messages format');
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -29,37 +33,54 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful AI assistant for a website. You help users by:
-            1. Answering questions about products and services
-            2. Providing technical support
-            3. Making personalized recommendations
-            4. Guiding users through quizzes to find the best solutions
-            Always be friendly, professional, and use emojis occasionally. Keep responses concise.
-            Current language: ${language}`
+            content: `You are a helpful and efficient AI assistant for our website. Your responses should be:
+            1. Immediate and concise
+            2. Directly related to the user's question
+            3. Professional but friendly
+            4. Include occasional emojis for engagement
+            
+            Focus on:
+            - Quick, accurate responses
+            - Product and service information
+            - Technical support
+            - Personalized recommendations
+            - Clear action items
+            
+            Current language: ${language}
+            Keep responses under 3 sentences unless more detail is specifically requested.`
           },
           ...messages
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 150, // Reduced for faster responses
+        presence_penalty: 0.6, // Encourages more focused responses
+        frequency_penalty: 0.2, // Reduces repetition
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API responded with status ${response.status}`);
+      console.error('OpenAI API error:', response.status);
+      throw new Error('Failed to get response from AI');
     }
 
     const data = await response.json();
     
     if (!data.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response from OpenAI API');
+      throw new Error('Invalid response format from AI');
     }
+
+    // Log the successful interaction
+    console.log('Successfully generated response');
 
     return new Response(JSON.stringify({ response: data.choices[0].message.content }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in chat-with-ai function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: 'Sorry, I had trouble processing that. Could you rephrase your question? 🤔',
+      details: error.message 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
