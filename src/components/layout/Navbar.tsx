@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -7,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,8 +55,9 @@ export const Navbar = () => {
     setIsSignUpOpen(true);
   };
 
-  const handleSignUpSubmit = (e: React.FormEvent) => {
+  const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (formData.password.length < 8) {
       toast({
         title: "Invalid Password",
@@ -65,12 +66,31 @@ export const Navbar = () => {
       });
       return;
     }
-    toast({
-      title: "Sign Up Successful",
-      description: "Thank you for signing up! We'll be in touch soon.",
-    });
-    setIsSignUpOpen(false);
-    setFormData({ email: "", name: "", password: "", company: "" });
+
+    try {
+      // Send verification email
+      const { error } = await supabase.functions.invoke('send-verification', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sign Up Successful",
+        description: "Please check your email to verify your account.",
+      });
+      setIsSignUpOpen(false);
+      setFormData({ email: "", name: "", password: "", company: "" });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send verification email. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,7 +280,7 @@ export const Navbar = () => {
           <DialogHeader>
             <DialogTitle>Create an Account</DialogTitle>
             <DialogDescription>
-              Fill in your details to create your account and get started.
+              Fill in your details to create your account and get started. You'll receive a verification email shortly.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSignUpSubmit} className="space-y-4 pt-4">
