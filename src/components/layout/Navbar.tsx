@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { scrollToSection } from "@/utils/scrollUtils";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export const Navbar = () => {
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     name: "",
@@ -27,7 +29,7 @@ export const Navbar = () => {
     const handleScroll = () => {
       const elements = document.elementsFromPoint(
         window.innerWidth / 2,
-        70 // Navbar height + small offset
+        70
       );
       
       const isHero = elements.some(element => {
@@ -52,6 +54,16 @@ export const Navbar = () => {
 
   const handleGetStarted = () => {
     setIsSignUpOpen(true);
+  };
+
+  const handleNavigation = (sectionId: string) => {
+    if (location.pathname !== '/') {
+      // If not on home page, navigate to home first
+      window.location.href = `/?section=${sectionId}`;
+    } else {
+      scrollToSection(sectionId);
+      setIsMenuOpen(false); // Close mobile menu if open
+    }
   };
 
   const handleSignUpSubmit = async (e: React.FormEvent) => {
@@ -111,17 +123,6 @@ export const Navbar = () => {
     }));
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const handleHome = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
 
   return (
@@ -136,15 +137,15 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8 text-base">
             <button 
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className={`relative group ${textColorClass}`}
+              onClick={() => handleNavigation('features')}
+              className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}
             >
               <span className="relative z-10">Features</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
             <button 
-              onClick={() => document.getElementById('solutions')?.scrollIntoView({ behavior: 'smooth' })}
-              className={`relative group ${textColorClass}`}
+              onClick={() => handleNavigation('solutions')}
+              className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}
             >
               <span className="relative z-10">Solutions</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
@@ -152,7 +153,7 @@ export const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-                className={`flex items-center gap-1 group ${textColorClass}`}
+                className={`flex items-center gap-1 group ${textColorClass} transition-all duration-300 ease-in-out`}
               >
                 <span className="relative z-10">Resources</span>
                 <svg
@@ -224,44 +225,38 @@ export const Navbar = () => {
             <SheetContent>
               <div className="flex flex-col gap-4 pt-8">
                 <button 
-                  onClick={handleHome}
-                  className="text-lg text-left py-2 hover:text-gray-600"
+                  onClick={() => handleNavigation('hero')}
+                  className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200"
                 >
                   Home
                 </button>
                 <button 
-                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-lg text-left py-2 hover:text-gray-600"
+                  onClick={() => handleNavigation('features')}
+                  className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200"
                 >
                   Features
                 </button>
                 <button 
-                  onClick={() => document.getElementById('solutions')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-lg text-left py-2 hover:text-gray-600"
+                  onClick={() => handleNavigation('solutions')}
+                  className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200"
                 >
                   Solutions
                 </button>
-                <button 
-                  onClick={() => scrollToSection("blog")}
-                  className="text-lg text-left py-2 hover:text-gray-600"
+                <Link 
+                  to="/blog"
+                  className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200"
                 >
                   Blog
-                </button>
-                <button 
-                  onClick={() => scrollToSection("pricing")}
-                  className="text-lg text-left py-2 hover:text-gray-600"
+                </Link>
+                <Link 
+                  to="/pricing"
+                  className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200"
                 >
                   Pricing
-                </button>
-                <button 
-                  onClick={() => scrollToSection("contact")}
-                  className="text-lg text-left py-2 hover:text-gray-600"
-                >
-                  Contact Us
-                </button>
+                </Link>
                 <ActionButton 
                   onClick={handleGetStarted}
-                  className="w-full mt-4"
+                  className="w-full mt-4 transform hover:scale-105 transition-all duration-200"
                 >
                   Get Started
                 </ActionButton>
