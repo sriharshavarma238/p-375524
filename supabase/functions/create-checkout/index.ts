@@ -2,8 +2,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.4.0?target=deno";
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+if (!stripeKey) {
+  console.error('STRIPE_SECRET_KEY is not set');
+}
+
+const stripe = new Stripe(stripeKey || '', {
   httpClient: Stripe.createFetchHttpClient(),
+  apiVersion: '2023-10-16', // Let's specify the API version explicitly
 });
 
 const corsHeaders = {
@@ -13,20 +19,18 @@ const corsHeaders = {
 
 interface PriceInfo {
   name: string;
-  price: number;
-  interval: 'month' | 'year';
+  priceId: string; // Using Stripe Price IDs instead of raw amounts
 }
 
+// Using actual Stripe Price IDs
 const PRICE_LOOKUP: Record<string, PriceInfo> = {
   starter: {
     name: 'Starter Plan',
-    price: 9900, // $99.00
-    interval: 'month',
+    priceId: 'price_1OpS1mSDyM8kDYjlr1p94q0K', // Replace with your actual Stripe Price ID for the starter plan
   },
   professional: {
     name: 'Professional Plan',
-    price: 19900, // $199.00
-    interval: 'month',
+    priceId: 'price_1OpS2KSDyM8kDYjlgKCbKPWa', // Replace with your actual Stripe Price ID for the professional plan
   },
 };
 
@@ -38,52 +42,64 @@ serve(async (req) => {
 
   try {
     const { planId, origin } = await req.json();
-    const plan = PRICE_LOOKUP[planId];
+    console.log('Received request for plan:', planId);
+    console.log('Origin:', origin);
 
+    const plan = PRICE_LOOKUP[planId];
     if (!plan) {
-      throw new Error('Invalid plan selected');
+      throw new Error(`Invalid plan selected: ${planId}`);
     }
 
     if (!origin) {
       throw new Error('Origin URL is required');
     }
 
-    console.log('Creating checkout session for plan:', planId);
-    console.log('Using origin:', origin);
+    console.log('Creating checkout session for plan:', plan.name);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: plan.name,
-            },
-            unit_amount: plan.price,
-            recurring: {
-              interval: plan.interval,
-            },
-          },
+          price: plan.priceId,
           quantity: 1,
         },
       ],
       mode: 'subscription',
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
+      automatic_tax: { enabled: true },
+      customer_creation: 'always',
     });
 
+    console.log('Checkout session created:', session.id);
+
     return new Response(
-      JSON.stringify({ sessionId: session.id, url: session.url }),
+      JSON.stringify({ 
+        sessionId: session.id, 
+        url: session.url,
+        planId: planId,
+        planName: plan.name
+      }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
         status: 200,
       },
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error creating checkout session:', error);
+    
+    // More detailed error response
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorResponse = {
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : undefined
+    };
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify(errorResponse),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

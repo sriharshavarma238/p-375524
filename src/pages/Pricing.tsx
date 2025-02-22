@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -10,9 +10,13 @@ import { supabase } from "@/integrations/supabase/client";
 const Pricing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const handleGetStarted = async (planId: string) => {
     try {
+      setIsLoading(planId);
+      console.log('Initiating checkout for plan:', planId);
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           planId,
@@ -25,11 +29,14 @@ const Pricing = () => {
         throw error;
       }
 
+      // Log the response for debugging
+      console.log('Checkout session created:', data);
+
       // Redirect to Stripe Checkout
       if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error('No checkout URL received from Stripe');
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
@@ -38,6 +45,8 @@ const Pricing = () => {
         title: "Checkout Error",
         description: error?.message || "Failed to initiate checkout. Please try again.",
       });
+    } finally {
+      setIsLoading(null);
     }
   };
 
@@ -57,6 +66,7 @@ const Pricing = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
+            {/* Starter Plan */}
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-semibold mb-4">Starter</h3>
               <p className="text-3xl font-bold mb-4">$99<span className="text-gray-500 text-lg">/mo</span></p>
@@ -83,11 +93,13 @@ const Pricing = () => {
               <ActionButton 
                 className="w-full"
                 onClick={() => handleGetStarted('starter')}
+                disabled={isLoading === 'starter'}
               >
-                Get Started
+                {isLoading === 'starter' ? 'Loading...' : 'Get Started'}
               </ActionButton>
             </div>
 
+            {/* Professional Plan */}
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-primary relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-primary text-white px-3 py-1 rounded-full text-sm">Popular</span>
@@ -117,11 +129,13 @@ const Pricing = () => {
               <ActionButton 
                 className="w-full bg-primary"
                 onClick={() => handleGetStarted('professional')}
+                disabled={isLoading === 'professional'}
               >
-                Get Started
+                {isLoading === 'professional' ? 'Loading...' : 'Get Started'}
               </ActionButton>
             </div>
 
+            {/* Enterprise Plan */}
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-semibold mb-4">Enterprise</h3>
               <p className="text-3xl font-bold mb-4">Custom</p>
