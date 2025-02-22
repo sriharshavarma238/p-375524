@@ -8,33 +8,30 @@ import { useToast } from "@/components/ui/use-toast";
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
-  const [isOverDarkBackground, setIsOverDarkBackground] = useState(true);
+  const [isOverHeroSection, setIsOverHeroSection] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
-      // Check if we're over a dark section by getting the element at current scroll position
       const elements = document.elementsFromPoint(
         window.innerWidth / 2,
         70 // Navbar height + small offset
       );
-      // Find the first element with a background color
-      const backgroundElement = elements.find(el => {
-        const bg = window.getComputedStyle(el).backgroundColor;
-        return bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+      
+      // Check if one of the elements is the Hero section
+      const isHero = elements.some(element => {
+        // Check if the element or its parent is the Hero section
+        const isHeroSection = (el: Element): boolean => {
+          if (!el) return false;
+          if (el.tagName.toLowerCase() === 'section' && el.querySelector('h1')?.textContent?.includes('Scaling Enterprises')) {
+            return true;
+          }
+          return el.parentElement ? isHeroSection(el.parentElement) : false;
+        };
+        return isHeroSection(element);
       });
       
-      if (backgroundElement) {
-        const bgColor = window.getComputedStyle(backgroundElement).backgroundColor;
-        const rgb = bgColor.match(/\d+/g);
-        if (rgb) {
-          // Calculate perceived brightness
-          const brightness = (Number(rgb[0]) * 299 + Number(rgb[1]) * 587 + Number(rgb[2]) * 114) / 1000;
-          setIsOverDarkBackground(brightness < 128);
-        }
-      } else {
-        setIsOverDarkBackground(true); // Default to dark background if no background color is found
-      }
+      setIsOverHeroSection(isHero);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -62,7 +59,7 @@ export const Navbar = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const textColorClass = isOverDarkBackground ? 'text-white' : 'text-gray-800';
+  const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
 
   return (
     <nav 
