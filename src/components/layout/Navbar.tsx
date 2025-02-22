@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -129,27 +130,20 @@ export const Navbar = () => {
         className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-colors duration-300 bg-transparent"
       >
         <div className="flex items-center gap-8 w-full justify-between md:justify-start">
-          <div className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
+          <Link to="/" className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
             <Logo />
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center gap-8 text-base">
             <button 
-              onClick={handleHome}
-              className={`relative group ${textColorClass}`}
-            >
-              <span className="relative z-10">Home</span>
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
-            </button>
-            <button 
-              onClick={() => scrollToSection("features")}
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               className={`relative group ${textColorClass}`}
             >
               <span className="relative z-10">Features</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
             <button 
-              onClick={() => scrollToSection("solutions")}
+              onClick={() => document.getElementById('solutions')?.scrollIntoView({ behavior: 'smooth' })}
               className={`relative group ${textColorClass}`}
             >
               <span className="relative z-10">Solutions</span>
@@ -176,28 +170,21 @@ export const Navbar = () => {
                     d="M19 9l-7 7-7-7"
                   />
                 </svg>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
               </button>
               {isResourcesOpen && (
                 <div className="absolute w-48 bg-white shadow-lg mt-2 py-2 rounded-md animate-fade-in">
-                  <button 
-                    onClick={() => scrollToSection("blog")}
+                  <Link 
+                    to="/blog"
                     className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
                   >
                     Blog
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection("pricing")}
+                  </Link>
+                  <Link 
+                    to="/pricing"
                     className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
                   >
                     Pricing
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection("contact")}
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    Contact Us
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -243,13 +230,13 @@ export const Navbar = () => {
                   Home
                 </button>
                 <button 
-                  onClick={() => scrollToSection("features")}
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-lg text-left py-2 hover:text-gray-600"
                 >
                   Features
                 </button>
                 <button 
-                  onClick={() => scrollToSection("solutions")}
+                  onClick={() => document.getElementById('solutions')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-lg text-left py-2 hover:text-gray-600"
                 >
                   Solutions

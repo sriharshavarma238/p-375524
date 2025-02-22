@@ -6,7 +6,6 @@ import { Features } from "@/components/sections/Features";
 import { Testimonial } from "@/components/sections/Testimonial";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { Footer } from "@/components/layout/Footer";
-import { SectionsContent } from "@/components/sections/SectionsContent";
 
 const Index = () => {
   return (
@@ -19,7 +18,6 @@ const Index = () => {
         <Hero />
         <Features />
         <Testimonial />
-        <SectionsContent />
         <CallToAction />
       </main>
 
