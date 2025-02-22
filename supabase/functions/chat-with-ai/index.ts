@@ -10,12 +10,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, language = 'en' } = await req.json();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -33,21 +34,31 @@ serve(async (req) => {
             2. Providing technical support
             3. Making personalized recommendations
             4. Guiding users through quizzes to find the best solutions
-            Always be friendly, professional, and use emojis occasionally. Keep responses concise.`
+            Always be friendly, professional, and use emojis occasionally. Keep responses concise.
+            Current language: ${language}`
           },
           ...messages
         ],
+        temperature: 0.7,
+        max_tokens: 500,
       }),
     });
 
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    if (!response.ok) {
+      throw new Error(`OpenAI API responded with status ${response.status}`);
+    }
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    const data = await response.json();
+    
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response from OpenAI API');
+    }
+
+    return new Response(JSON.stringify({ response: data.choices[0].message.content }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in chat-with-ai function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

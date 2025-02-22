@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -40,7 +41,7 @@ export const Navbar = () => {
     <nav 
       className={`fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/80 backdrop-blur-md shadow-lg' 
+          ? 'bg-transparent backdrop-blur-sm' 
           : 'bg-transparent'
       }`}
     >
