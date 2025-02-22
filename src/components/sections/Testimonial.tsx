@@ -22,7 +22,7 @@ export const Testimonial = () => {
                 playsInline
               >
                 <source 
-                  src="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png" 
+                  src="hackathon_video_i41zng" 
                   type="video/mp4" 
                 />
                 Your browser does not support the video tag.
