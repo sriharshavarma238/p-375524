@@ -8,13 +8,11 @@ import { useToast } from "@/components/ui/use-toast";
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isOverDarkBackground, setIsOverDarkBackground] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
       // Check if we're over a dark section by getting the element at current scroll position
       const elements = document.elementsFromPoint(
         window.innerWidth / 2,
@@ -65,13 +63,10 @@ export const Navbar = () => {
   };
 
   const textColorClass = isOverDarkBackground ? 'text-white' : 'text-gray-800';
-  const navbarBgClass = isScrolled 
-    ? 'bg-white/80 backdrop-blur-md shadow-sm'
-    : 'bg-transparent';
 
   return (
     <nav 
-      className={`fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-all duration-300 ${navbarBgClass}`}
+      className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-colors duration-300 bg-transparent"
     >
       <div className="flex items-center gap-8 w-full justify-between md:justify-start">
         <div className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
@@ -81,21 +76,21 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-8 text-base">
           <button 
             onClick={handleHome}
-            className={`relative group ${isScrolled ? 'text-gray-800' : textColorClass}`}
+            className={`relative group ${textColorClass}`}
           >
             <span className="relative z-10">Home</span>
             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
           </button>
           <button 
             onClick={() => scrollToSection("features")}
-            className={`relative group ${isScrolled ? 'text-gray-800' : textColorClass}`}
+            className={`relative group ${textColorClass}`}
           >
             <span className="relative z-10">Features</span>
             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
           </button>
           <button 
             onClick={() => scrollToSection("solutions")}
-            className={`relative group ${isScrolled ? 'text-gray-800' : textColorClass}`}
+            className={`relative group ${textColorClass}`}
           >
             <span className="relative z-10">Solutions</span>
             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
@@ -103,7 +98,7 @@ export const Navbar = () => {
           <div className="relative">
             <button
               onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-              className={`flex items-center gap-1 group ${isScrolled ? 'text-gray-800' : textColorClass}`}
+              className={`flex items-center gap-1 group ${textColorClass}`}
             >
               <span className="relative z-10">Resources</span>
               <svg
@@ -160,7 +155,7 @@ export const Navbar = () => {
         <Sheet>
           <SheetTrigger asChild>
             <button
-              className={`md:hidden ${isScrolled ? 'text-gray-800' : textColorClass}`}
+              className={`md:hidden ${textColorClass}`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
