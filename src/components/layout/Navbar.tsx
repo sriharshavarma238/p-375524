@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -15,6 +16,7 @@ export const Navbar = () => {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
+    password: "",
     company: ""
   });
   const { toast } = useToast();
@@ -55,12 +57,20 @@ export const Navbar = () => {
 
   const handleSignUpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password.length < 8) {
+      toast({
+        title: "Invalid Password",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
     toast({
       title: "Sign Up Successful",
       description: "Thank you for signing up! We'll be in touch soon.",
     });
     setIsSignUpOpen(false);
-    setFormData({ email: "", name: "", company: "" });
+    setFormData({ email: "", name: "", password: "", company: "" });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,9 +258,9 @@ export const Navbar = () => {
       <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Sign Up</DialogTitle>
+            <DialogTitle>Create an Account</DialogTitle>
             <DialogDescription>
-              Fill in your details to get started with our platform.
+              Fill in your details to create your account and get started.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSignUpSubmit} className="space-y-4 pt-4">
@@ -266,7 +276,7 @@ export const Navbar = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 name="email"
@@ -276,6 +286,22 @@ export const Navbar = () => {
                 placeholder="john@example.com"
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Enter your password"
+                required
+                minLength={8}
+              />
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters long
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="company">Company Name</Label>
@@ -289,7 +315,7 @@ export const Navbar = () => {
               />
             </div>
             <ActionButton type="submit" className="w-full">
-              Sign Up
+              Create Account
             </ActionButton>
           </form>
         </DialogContent>
