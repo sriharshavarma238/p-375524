@@ -9,7 +9,7 @@ if (!stripeKey) {
 
 const stripe = new Stripe(stripeKey || '', {
   httpClient: Stripe.createFetchHttpClient(),
-  apiVersion: '2023-10-16', // Let's specify the API version explicitly
+  apiVersion: '2023-10-16',
 });
 
 const corsHeaders = {
@@ -17,20 +17,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface PriceInfo {
+interface PlanInfo {
   name: string;
-  priceId: string; // Using Stripe Price IDs instead of raw amounts
+  price: number;
 }
 
-// Using actual Stripe Price IDs
-const PRICE_LOOKUP: Record<string, PriceInfo> = {
+const PLANS: Record<string, PlanInfo> = {
   starter: {
     name: 'Starter Plan',
-    priceId: 'price_1OpS1mSDyM8kDYjlr1p94q0K', // Replace with your actual Stripe Price ID for the starter plan
+    price: 9900, // $99.00
   },
   professional: {
     name: 'Professional Plan',
-    priceId: 'price_1OpS2KSDyM8kDYjlgKCbKPWa', // Replace with your actual Stripe Price ID for the professional plan
+    price: 19900, // $199.00
   },
 };
 
@@ -45,7 +44,7 @@ serve(async (req) => {
     console.log('Received request for plan:', planId);
     console.log('Origin:', origin);
 
-    const plan = PRICE_LOOKUP[planId];
+    const plan = PLANS[planId];
     if (!plan) {
       throw new Error(`Invalid plan selected: ${planId}`);
     }
@@ -56,11 +55,27 @@ serve(async (req) => {
 
     console.log('Creating checkout session for plan:', plan.name);
 
+    // Create a product for this purchase
+    const product = await stripe.products.create({
+      name: plan.name,
+    });
+
+    // Create a price for the product
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: plan.price,
+      currency: 'usd',
+      recurring: {
+        interval: 'month',
+      },
+    });
+
+    // Create the checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: plan.priceId,
+          price: price.id,
           quantity: 1,
         },
       ],
@@ -77,8 +92,6 @@ serve(async (req) => {
       JSON.stringify({ 
         sessionId: session.id, 
         url: session.url,
-        planId: planId,
-        planName: plan.name
       }),
       {
         headers: { 
@@ -91,7 +104,6 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error creating checkout session:', error);
     
-    // More detailed error response
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorResponse = {
       error: errorMessage,
