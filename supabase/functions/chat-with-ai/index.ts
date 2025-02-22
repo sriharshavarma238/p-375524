@@ -21,32 +21,23 @@ serve(async (req) => {
       throw new Error('Invalid messages format');
     }
 
-    const systemPrompt = context === 'cybersecurity' 
-      ? `You are an expert cybersecurity AI assistant. Your responses should be:
-         1. Security-focused and precise
-         2. Professional yet accessible
-         3. Based on current best practices
-         4. Actionable and clear
+    const systemPrompt = context === 'business' 
+      ? `You are an expert business AI assistant. Your responses should be:
+         1. Business-focused and strategic
+         2. Professional and actionable
+         3. Based on current market trends
+         4. Clear and concise
 
          Prioritize:
-         - Immediate threat mitigation
-         - Security best practices
-         - Clear, step-by-step guidance
-         - Risk assessment
-         - Compliance considerations
+         - Strategic business insights
+         - Enterprise solutions
+         - Market analysis
+         - Growth opportunities
+         - Partnership recommendations
 
-         Use appropriate emojis for severity:
-         🔴 High severity
-         🟡 Medium severity
-         🟢 Low severity
-
-         Keep responses concise unless detailed explanation is needed.`
-      : `You are a helpful and efficient AI assistant. Your responses should be:
-         1. Immediate and concise
-         2. Professional but friendly
-         3. Clear and actionable
-         
-         Include occasional emojis for engagement.`;
+         Use business-appropriate language and occasional emojis for engagement.
+         Keep responses concise and action-oriented.`
+      : `You are a helpful AI assistant. Keep responses concise and professional.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
