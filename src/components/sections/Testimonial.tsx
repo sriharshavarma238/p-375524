@@ -19,8 +19,12 @@ export const Testimonial = () => {
                 className="absolute h-full w-full object-cover"
                 autoPlay
                 controls
+                playsInline
               >
-                <source src="/path-to-your-video.mp4" type="video/mp4" />
+                <source 
+                  src="https://cdn.builder.io/o/assets%2Fpages%2F62f28e6fbf0784c64f93725d%2Fvideos%2F63ea31a9deed38e6aa0b0aad_video_1.mp4?apiKey=99f09873d7dd4ddcb35f7bed72e0718c&token=63ea31a9deed38e6aa0b0aad&alt=media" 
+                  type="video/mp4" 
+                />
                 Your browser does not support the video tag.
               </video>
             ) : (
@@ -68,7 +72,7 @@ export const Testimonial = () => {
               <div className="border-l border-black h-[61px]"></div>
               <img
                 loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/f7e8bc504329a6bc82554553ee1c44638d92214fdca96068ed3880bd5d0aa1cb?placeholderIfAbsent=true"
+                src="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/f7e8bc504329a6bc82554553ee1c44638d92214fdca96068ed3880bd5d0aa1cb?placeholderIfabsent=true"
                 className="h-[61px] object-contain"
                 alt="Company logo"
               />
