@@ -1,12 +1,11 @@
-
 import React from "react";
 
 export const SectionsContent = () => {
   return (
     <>
-      <section id="features" className="py-20 bg-gray-50">
+      <section id="features" className="py-20 bg-[#F2FCE2]">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
-          <h2 className="text-3xl font-bold mb-8">Features</h2>
+          <h2 className="text-3xl font-bold mb-8 text-gray-800">Features</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-xl font-semibold mb-4">AI-Powered Analytics</h3>
@@ -24,9 +23,9 @@ export const SectionsContent = () => {
         </div>
       </section>
 
-      <section id="solutions" className="py-20">
+      <section id="solutions" className="py-20 bg-[#D3E4FD]">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
-          <h2 className="text-3xl font-bold mb-8">Solutions</h2>
+          <h2 className="text-3xl font-bold mb-8 text-gray-800">Solutions</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4">Enterprise Solutions</h3>
@@ -40,9 +39,9 @@ export const SectionsContent = () => {
         </div>
       </section>
 
-      <section id="blog" className="py-20 bg-gray-50">
+      <section id="blog" className="py-20 bg-[#FEF7CD]">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
-          <h2 className="text-3xl font-bold mb-8">Blog</h2>
+          <h2 className="text-3xl font-bold mb-8 text-gray-800">Blog</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <article className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-xl font-semibold mb-4">Latest Insights</h3>
@@ -56,9 +55,9 @@ export const SectionsContent = () => {
         </div>
       </section>
 
-      <section id="pricing" className="py-20">
+      <section id="pricing" className="py-20 bg-[#FDE1D3]">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
-          <h2 className="text-3xl font-bold mb-8">Pricing</h2>
+          <h2 className="text-3xl font-bold mb-8 text-gray-800">Pricing</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4">Starter</h3>
@@ -91,9 +90,9 @@ export const SectionsContent = () => {
         </div>
       </section>
 
-      <section id="contact" className="py-20 bg-gray-50">
+      <section id="contact" className="py-20 bg-[#F2FCE2]">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
-          <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
+          <h2 className="text-3xl font-bold mb-8 text-gray-800">Contact Us</h2>
           <div className="max-w-lg mx-auto">
             <form className="space-y-6">
               <div>
