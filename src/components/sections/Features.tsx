@@ -97,19 +97,19 @@ export const Features = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             <InsightStep
-              image="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png"
+              image="/lovable-uploads/462eb367-4541-4da1-a84e-3966867f8fc2.png"
               title="Step 1: AI Scanning for Comprehensive Data Analysis"
               description="Our AI scans vast datasets to identify trends and opportunities."
               actionText="Learn"
             />
             <InsightStep
-              image="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png"
+              image="/lovable-uploads/0b4fb985-4c15-4890-bc61-19fe508dbd58.png"
               title="Step 2: Predictive Modeling for Strategic Decision Making"
               description="Utilize predictive models to forecast market movements and risks."
               actionText="Discover"
             />
             <InsightStep
-              image="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png"
+              image="/lovable-uploads/b98d46c6-f611-4f71-ab1a-d9e129a520dc.png"
               title="Step 3: Implementation and Optimization"
               description="Put insights into action with our proven implementation framework."
               actionText="Analyze"
