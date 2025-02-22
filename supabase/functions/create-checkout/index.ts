@@ -24,11 +24,8 @@ serve(async (req) => {
   }
 
   try {
-    // Validate request method
-    if (req.method !== 'POST') {
-      throw new Error(`HTTP method ${req.method} is not allowed`);
-    }
-
+    console.log('Starting checkout process...');
+    
     // Parse and validate request body
     const { planId, origin } = await req.json();
     console.log('Request received:', { planId, origin });
@@ -41,11 +38,11 @@ serve(async (req) => {
     const plans = {
       starter: {
         name: 'Starter Plan',
-        price: 9900,
+        price: 9900, // $99.00
       },
       professional: {
         name: 'Professional Plan',
-        price: 19900,
+        price: 19900, // $199.00
       },
     };
 
@@ -54,43 +51,32 @@ serve(async (req) => {
       throw new Error(`Invalid plan: ${planId}`);
     }
 
-    // Create Stripe product
-    console.log('Creating Stripe product...');
-    const product = await stripe.products.create({
-      name: plan.name,
-      description: `Monthly subscription for ${plan.name}`,
-    });
-    console.log('Product created:', product.id);
-
-    // Create Stripe price
-    console.log('Creating Stripe price...');
-    const price = await stripe.prices.create({
-      product: product.id,
-      unit_amount: plan.price,
-      currency: 'usd',
-      recurring: {
-        interval: 'month',
-      },
-    });
-    console.log('Price created:', price.id);
-
-    // Create checkout session
+    // Create Stripe checkout session directly with a price
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
       line_items: [
         {
-          price: price.id,
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: plan.name,
+              description: `Monthly subscription for ${plan.name}`,
+            },
+            unit_amount: plan.price,
+            recurring: {
+              interval: 'month',
+            },
+          },
           quantity: 1,
         },
       ],
       mode: 'subscription',
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
-      billing_address_collection: 'required',
-      payment_method_types: ['card'],
-      customer_creation: 'always',
     });
-    console.log('Checkout session created:', session.id);
+
+    console.log('Checkout session created successfully:', session.id);
 
     return new Response(
       JSON.stringify({ url: session.url }),
@@ -100,11 +86,13 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in checkout process:', error);
     
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
