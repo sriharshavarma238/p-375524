@@ -3,7 +3,7 @@ import React from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,7 +17,10 @@ const Pricing = () => {
         body: { planId },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
       // Redirect to Stripe Checkout
       if (data?.url) {
@@ -25,12 +28,12 @@ const Pricing = () => {
       } else {
         throw new Error('No checkout URL received');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to initiate checkout. Please try again.",
+        title: "Checkout Error",
+        description: error?.message || "Failed to initiate checkout. Please try again.",
       });
     }
   };

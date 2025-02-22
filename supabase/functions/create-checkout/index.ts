@@ -44,7 +44,12 @@ serve(async (req) => {
       throw new Error('Invalid plan selected');
     }
 
+    // Get the request URL to determine the domain
+    const url = new URL(req.url);
+    const baseUrl = Deno.env.get('SITE_URL') || `${url.protocol}//${url.host}`;
+
     console.log('Creating checkout session for plan:', planId);
+    console.log('Using base URL:', baseUrl);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -64,8 +69,8 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${Deno.env.get('SITE_URL')}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${Deno.env.get('SITE_URL')}/pricing`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/pricing`,
     });
 
     return new Response(
