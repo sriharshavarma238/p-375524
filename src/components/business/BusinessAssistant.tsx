@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Send, X, Loader2, Building2, LineChart, CheckCircle } from "lucide-react";
+import { Send, X, Loader2, Building2, LineChart, CheckCircle, Mic, MicOff, ThumbsUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -10,13 +10,25 @@ interface Message {
   content: string;
   type: 'user' | 'bot';
   timestamp: Date;
-  category?: 'strategy' | 'insight' | 'recommendation' | 'analysis';
+  category?: 'strategy' | 'insight' | 'recommendation' | 'analysis' | 'feedback' | 'quiz';
+}
+
+interface QuizState {
+  isActive: boolean;
+  currentQuestion: number;
+  answers: Record<string, string>;
 }
 
 export const BusinessAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [quizState, setQuizState] = useState<QuizState>({ 
+    isActive: false, 
+    currentQuestion: 0,
+    answers: {}
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -31,16 +43,95 @@ export const BusinessAssistant = () => {
   useEffect(() => {
     if (messages.length === 0) {
       addBotMessage(
-        "Hello! I'm your Business Assistant. I can help you with:\n\n" +
+        "Hello! I'm your AI Business Assistant. I can help you with:\n\n" +
         "📊 Business strategy and planning\n" +
-        "💼 Enterprise solutions\n" +
-        "📈 Market analysis and insights\n" +
-        "🤝 Partnership opportunities\n\n" +
-        "How can I assist you with your business needs today?",
+        "💼 Product recommendations\n" +
+        "🎯 Personalized solutions (take our quiz!)\n" +
+        "🎤 Voice commands available\n" +
+        "💬 Feedback and support\n\n" +
+        "How can I assist you today?",
         'insight'
       );
     }
   }, []);
+
+  const startVoiceRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onstart = () => {
+        setIsListening(true);
+        toast({
+          title: "Listening",
+          description: "Speak now...",
+        });
+      };
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInputMessage(transcript);
+        handleUserMessage(transcript);
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        toast({
+          title: "Error",
+          description: "Could not recognize speech. Please try again.",
+          variant: "destructive",
+        });
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } else {
+      toast({
+        title: "Not Supported",
+        description: "Voice recognition is not supported in your browser.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const startProductQuiz = () => {
+    setQuizState({
+      isActive: true,
+      currentQuestion: 0,
+      answers: {}
+    });
+    
+    addBotMessage(
+      "Let's find the perfect solution for you! First question:\n\n" +
+      "What's your primary business goal?\n" +
+      "1️⃣ Increase revenue\n" +
+      "2️⃣ Improve efficiency\n" +
+      "3️⃣ Expand market reach\n" +
+      "4️⃣ Enhance customer service\n\n" +
+      "Just type the number or describe your goal!",
+      'quiz'
+    );
+  };
+
+  const collectFeedback = () => {
+    addBotMessage(
+      "I'd love to hear your thoughts! 💭\n\n" +
+      "How was your experience with our services today?\n" +
+      "• Excellent 🌟\n" +
+      "• Good 👍\n" +
+      "• Could be better 🤔\n" +
+      "• Not satisfied 😔\n\n" +
+      "Feel free to add any specific comments!",
+      'feedback'
+    );
+  };
 
   const addUserMessage = (content: string) => {
     const message: Message = {
@@ -65,6 +156,18 @@ export const BusinessAssistant = () => {
 
   const handleUserMessage = async (message: string) => {
     setIsProcessing(true);
+    
+    if (message.toLowerCase().includes('quiz') || message.toLowerCase().includes('survey')) {
+      startProductQuiz();
+      setIsProcessing(false);
+      return;
+    }
+
+    if (message.toLowerCase().includes('feedback')) {
+      collectFeedback();
+      setIsProcessing(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-with-ai', {
@@ -112,16 +215,27 @@ export const BusinessAssistant = () => {
         <div className="p-4 border-b bg-black text-white rounded-t-lg flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5" />
-            <h3 className="font-semibold">Business Assistant</h3>
+            <h3 className="font-semibold">AI Business Assistant</h3>
           </div>
-          {messages.length > 0 && (
-            <button
-              onClick={() => setMessages([])}
-              className="hover:text-gray-300 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {messages.length > 0 && (
+              <>
+                <button
+                  onClick={collectFeedback}
+                  className="hover:text-gray-300 transition-colors p-2"
+                  title="Give Feedback"
+                >
+                  <ThumbsUp className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setMessages([])}
+                  className="hover:text-gray-300 transition-colors p-2"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="h-[500px] overflow-y-auto p-4">
@@ -161,12 +275,23 @@ export const BusinessAssistant = () => {
 
         <div className="p-4 border-t">
           <div className="flex items-center gap-2">
+            <Button
+              onClick={startVoiceRecognition}
+              className={`${
+                isListening 
+                  ? 'bg-red-500 hover:bg-red-600' 
+                  : 'bg-gray-200 hover:bg-gray-300'
+              } text-black`}
+              disabled={isProcessing}
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </Button>
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about business solutions..."
+              placeholder="Ask about business solutions, take our quiz, or give feedback..."
               className="flex-1 p-2 border rounded-lg focus:outline-none focus:border-black"
               disabled={isProcessing}
             />
