@@ -22,37 +22,69 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email }: VerificationEmailRequest = await req.json();
+    // Validate request method
+    if (req.method !== "POST") {
+      throw new Error(`Method ${req.method} not allowed`);
+    }
 
+    // Parse and validate request body
+    const { name, email }: VerificationEmailRequest = await req.json();
+    
+    if (!name || !email) {
+      throw new Error("Name and email are required");
+    }
+
+    console.log("Attempting to send verification email to:", email);
+
+    // Attempt to send email
     const emailResponse = await resend.emails.send({
       from: "Lovable <onboarding@resend.dev>",
       to: [email],
       subject: "Verify your email address",
       html: `
-        <h1>Welcome to our platform, ${name}!</h1>
-        <p>Thank you for signing up. Please verify your email address by clicking the link below:</p>
-        <p><a href="${Deno.env.get("SITE_URL")}/verify?email=${encodeURIComponent(email)}">Verify Email Address</a></p>
-        <p>If you didn't create an account, you can safely ignore this email.</p>
-        <p>Best regards,<br>The Team</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #333;">Welcome to our platform, ${name}!</h1>
+          <p>Thank you for signing up. Please verify your email address by clicking the link below:</p>
+          <p style="margin: 20px 0;">
+            <a href="${Deno.env.get("SITE_URL")}/verify?email=${encodeURIComponent(email)}"
+               style="background-color: #000; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
+              Verify Email Address
+            </a>
+          </p>
+          <p>If you didn't create an account, you can safely ignore this email.</p>
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
+          <p style="color: #666; font-size: 14px;">Best regards,<br>The Team</p>
+        </div>
       `,
     });
 
-    console.log("Verification email sent successfully:", emailResponse);
+    console.log("Email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
-  } catch (error: any) {
-    console.error("Error sending verification email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ message: "Verification email sent successfully" }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      }
+    );
+  } catch (error: any) {
+    console.error("Error in send-verification function:", error);
+    const errorMessage = error.message || "An unexpected error occurred";
+    
+    return new Response(
+      JSON.stringify({ 
+        error: errorMessage,
+        details: error.toString()
+      }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { 
+          "Content-Type": "application/json",
+          ...corsHeaders 
+        },
       }
     );
   }

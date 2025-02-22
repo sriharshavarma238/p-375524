@@ -13,6 +13,7 @@ export const Navbar = () => {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     name: "",
@@ -28,9 +29,7 @@ export const Navbar = () => {
         70 // Navbar height + small offset
       );
       
-      // Check if one of the elements is the Hero section
       const isHero = elements.some(element => {
-        // Check if the element or its parent is the Hero section
         const isHeroSection = (el: Element): boolean => {
           if (!el) return false;
           if (el.tagName.toLowerCase() === 'section' && el.querySelector('h1')?.textContent?.includes('Scaling Enterprises')) {
@@ -45,7 +44,6 @@ export const Navbar = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Run once on mount to set initial state
     handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
@@ -67,29 +65,40 @@ export const Navbar = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      // Send verification email
-      const { error } = await supabase.functions.invoke('send-verification', {
+      console.log("Sending verification email to:", formData.email);
+      const { data, error } = await supabase.functions.invoke('send-verification', {
         body: {
           name: formData.name,
           email: formData.email,
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw error;
+      }
 
+      console.log("Verification email response:", data);
+      
       toast({
-        title: "Sign Up Successful",
-        description: "Please check your email to verify your account.",
+        title: "Verification Email Sent",
+        description: `We've sent a verification email to ${formData.email}. Please check your inbox.`,
       });
+      
       setIsSignUpOpen(false);
       setFormData({ email: "", name: "", password: "", company: "" });
     } catch (error) {
+      console.error("Signup error:", error);
       toast({
         title: "Error",
         description: "Failed to send verification email. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -293,6 +302,7 @@ export const Navbar = () => {
                 onChange={handleInputChange}
                 placeholder="John Doe"
                 required
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -305,6 +315,7 @@ export const Navbar = () => {
                 onChange={handleInputChange}
                 placeholder="john@example.com"
                 required
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -318,6 +329,7 @@ export const Navbar = () => {
                 placeholder="Enter your password"
                 required
                 minLength={8}
+                disabled={isSubmitting}
               />
               <p className="text-xs text-gray-500">
                 Password must be at least 8 characters long
@@ -332,10 +344,11 @@ export const Navbar = () => {
                 onChange={handleInputChange}
                 placeholder="Acme Inc."
                 required
+                disabled={isSubmitting}
               />
             </div>
-            <ActionButton type="submit" className="w-full">
-              Create Account
+            <ActionButton type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </ActionButton>
           </form>
         </DialogContent>
