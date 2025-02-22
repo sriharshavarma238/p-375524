@@ -37,19 +37,19 @@ serve(async (req) => {
   }
 
   try {
-    const { planId } = await req.json();
+    const { planId, origin } = await req.json();
     const plan = PRICE_LOOKUP[planId];
 
     if (!plan) {
       throw new Error('Invalid plan selected');
     }
 
-    // Get the request URL to determine the domain
-    const url = new URL(req.url);
-    const baseUrl = Deno.env.get('SITE_URL') || `${url.protocol}//${url.host}`;
+    if (!origin) {
+      throw new Error('Origin URL is required');
+    }
 
     console.log('Creating checkout session for plan:', planId);
-    console.log('Using base URL:', baseUrl);
+    console.log('Using origin:', origin);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -69,8 +69,8 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/pricing`,
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/pricing`,
     });
 
     return new Response(

@@ -14,7 +14,10 @@ const Pricing = () => {
   const handleGetStarted = async (planId: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planId },
+        body: { 
+          planId,
+          origin: window.location.origin 
+        },
       });
 
       if (error) {
