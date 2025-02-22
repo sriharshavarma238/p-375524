@@ -3,8 +3,38 @@ import React from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ActionButton } from "@/components/ui/ActionButton";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleGetStarted = async (planId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId },
+      });
+
+      if (error) throw error;
+
+      // Redirect to Stripe Checkout
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to initiate checkout. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50">
@@ -44,10 +74,15 @@ const Pricing = () => {
                   Basic Support
                 </li>
               </ul>
-              <ActionButton className="w-full">Get Started</ActionButton>
+              <ActionButton 
+                className="w-full"
+                onClick={() => handleGetStarted('starter')}
+              >
+                Get Started
+              </ActionButton>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-primary">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-primary relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-primary text-white px-3 py-1 rounded-full text-sm">Popular</span>
               </div>
@@ -73,7 +108,12 @@ const Pricing = () => {
                   Priority Support
                 </li>
               </ul>
-              <ActionButton className="w-full bg-primary">Get Started</ActionButton>
+              <ActionButton 
+                className="w-full bg-primary"
+                onClick={() => handleGetStarted('professional')}
+              >
+                Get Started
+              </ActionButton>
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
@@ -99,7 +139,12 @@ const Pricing = () => {
                   24/7 Support
                 </li>
               </ul>
-              <ActionButton className="w-full">Contact Sales</ActionButton>
+              <ActionButton 
+                className="w-full"
+                onClick={() => window.location.href = 'mailto:sales@yourdomain.com'}
+              >
+                Contact Sales
+              </ActionButton>
             </div>
           </div>
         </div>
