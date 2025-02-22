@@ -15,12 +15,38 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, language = 'en' } = await req.json();
+    const { messages, context = 'general' } = await req.json();
 
-    // Validate input
     if (!Array.isArray(messages) || messages.length === 0) {
       throw new Error('Invalid messages format');
     }
+
+    const systemPrompt = context === 'cybersecurity' 
+      ? `You are an expert cybersecurity AI assistant. Your responses should be:
+         1. Security-focused and precise
+         2. Professional yet accessible
+         3. Based on current best practices
+         4. Actionable and clear
+
+         Prioritize:
+         - Immediate threat mitigation
+         - Security best practices
+         - Clear, step-by-step guidance
+         - Risk assessment
+         - Compliance considerations
+
+         Use appropriate emojis for severity:
+         🔴 High severity
+         🟡 Medium severity
+         🟢 Low severity
+
+         Keep responses concise unless detailed explanation is needed.`
+      : `You are a helpful and efficient AI assistant. Your responses should be:
+         1. Immediate and concise
+         2. Professional but friendly
+         3. Clear and actionable
+         
+         Include occasional emojis for engagement.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -31,30 +57,13 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          {
-            role: 'system',
-            content: `You are a helpful and efficient AI assistant for our website. Your responses should be:
-            1. Immediate and concise
-            2. Directly related to the user's question
-            3. Professional but friendly
-            4. Include occasional emojis for engagement
-            
-            Focus on:
-            - Quick, accurate responses
-            - Product and service information
-            - Technical support
-            - Personalized recommendations
-            - Clear action items
-            
-            Current language: ${language}
-            Keep responses under 3 sentences unless more detail is specifically requested.`
-          },
+          { role: 'system', content: systemPrompt },
           ...messages
         ],
         temperature: 0.7,
-        max_tokens: 150, // Reduced for faster responses
-        presence_penalty: 0.6, // Encourages more focused responses
-        frequency_penalty: 0.2, // Reduces repetition
+        max_tokens: 150,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.2,
       }),
     });
 
@@ -69,7 +78,6 @@ serve(async (req) => {
       throw new Error('Invalid response format from AI');
     }
 
-    // Log the successful interaction
     console.log('Successfully generated response');
 
     return new Response(JSON.stringify({ response: data.choices[0].message.content }), {
