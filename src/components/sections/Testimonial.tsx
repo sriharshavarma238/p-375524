@@ -22,7 +22,7 @@ export const Testimonial = () => {
                 playsInline
               >
                 <source 
-                  src="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png" 
+                  src="https://cdn.builder.io/o/assets%2Fpages%2F62f28e6fbf0784c64f93725d%2Fvideos%2F63ea31a9deed38e6aa0b0aad_video_1.mp4?apiKey=99f09873d7dd4ddcb35f7bed72e0718c&token=63ea31a9deed38e6aa0b0aad&alt=media" 
                   type="video/mp4" 
                 />
                 Your browser does not support the video tag.
@@ -31,7 +31,7 @@ export const Testimonial = () => {
               <>
                 <img
                   loading="lazy"
-                  src="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png"
+                  srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=2000 2000w"
                   className="absolute h-full w-full object-cover"
                   alt="Testimonial background"
                 />
