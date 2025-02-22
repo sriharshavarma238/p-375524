@@ -1,25 +1,44 @@
-import React from "react";
+
+import React, { useState } from "react";
+import { Play } from "lucide-react";
 
 export const Testimonial = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlayClick = () => {
+    setIsPlaying(true);
+  };
+
   return (
     <section className="bg-white w-full py-28 px-4 md:px-16">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row gap-[40px_80px] items-center">
           <div className="flex-1 relative min-h-[640px] overflow-hidden">
-            <img
-              loading="lazy"
-              srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=2000 2000w"
-              className="absolute h-full w-full object-cover"
-              alt="Testimonial background"
-            />
-            <div className="relative h-full flex items-center justify-center">
-              <img
-                loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/2c32cf666f8fcd7ef909b7161a8b44cf8029d362b4d8f605270db380a22244cb?placeholderIfAbsent=true"
-                className="w-[100px] object-contain"
-                alt="Testimonial icon"
-              />
-            </div>
+            {isPlaying ? (
+              <video
+                className="absolute h-full w-full object-cover"
+                autoPlay
+                controls
+              >
+                <source src="/path-to-your-video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <>
+                <img
+                  loading="lazy"
+                  srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/7c8bec7f05b70a10ee71ee79813ed5dc50d4a322df4224d3fe14612c0c4266eb?placeholderIfAbsent=true&width=2000 2000w"
+                  className="absolute h-full w-full object-cover"
+                  alt="Testimonial background"
+                />
+                <button
+                  onClick={handlePlayClick}
+                  className="absolute inset-0 m-auto w-16 h-16 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full transition-colors duration-200"
+                >
+                  <Play className="w-8 h-8 text-white" />
+                </button>
+              </>
+            )}
           </div>
 
           <div className="flex-1">
