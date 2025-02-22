@@ -1,40 +1,55 @@
+
 import React from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-[900px] w-full flex items-center justify-center overflow-hidden">
-      <img
-        loading="lazy"
-        srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/e18e13be738cbf10cd48d58b583f5a53f4c7a781a550c2587c827bcff17f5cf0?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/e18e13be738cbf10cd48d58b583f5a53f4c7a781a550c2587c827bcff17f5cf0?placeholderIfAbsent=true&width=2000 2000w"
-        className="absolute h-full w-full object-cover inset-0"
-        alt="Hero background"
-      />
+    <section className="relative min-h-screen w-full flex items-center bg-[#1A1A1A]">
+      <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-16">
+        <div className="flex-1 space-y-8">
+          <p className="text-primary text-xl font-medium">Secure your wealth</p>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white">
+            Manage all your<br />
+            money <span className="text-secondary">$</span> in one place.
+          </h1>
 
-      <div className="relative z-10 max-w-[768px] mx-auto px-4 text-center">
-        <h1 className="text-[#FFEA00] text-[56px] font-bold leading-[67px] md:leading-[67px] max-md:text-[40px] max-md:leading-[54px]">
-          Scaling Enterprises at the Speed of Thought
-        </h1>
+          <p className="text-gray-400 text-lg max-w-lg">
+            Our Personal Finance Product provides comprehensive money management tools to
+            help you budget, save, and grow your wealth.
+          </p>
 
-        <p className="text-[#00F6FF] text-lg font-normal leading-[27px] mt-6">
-          Unlock the potential of Quantum AI-driven insights to propel your
-          business into new markets. Stay ahead of the competition with
-          data-backed strategies designed for rapid expansion.
-        </p>
+          <div>
+            <ActionButton
+              variant="primary"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg"
+            >
+              Sign Up
+            </ActionButton>
+          </div>
+        </div>
 
-        <div className="flex gap-4 justify-center mt-8">
-          <ActionButton
-            variant="secondary"
-            className="bg-white text-black border-white hover:bg-gray-100"
-          >
-            Get Started
-          </ActionButton>
-          <ActionButton
-            variant="secondary"
-            className="text-white border-white hover:bg-white/10"
-          >
-            Request a Demo
-          </ActionButton>
+        <div className="flex-1 relative">
+          <div className="relative w-full aspect-square">
+            <div className="absolute inset-0 grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="h-full w-full rounded-xl border border-gray-800 bg-gray-900/50"></div>
+                <div className="h-32 w-full rounded-xl border border-gray-800 bg-gray-900/50"></div>
+              </div>
+              <div className="space-y-4 pt-16">
+                <div className="h-32 w-full rounded-xl border border-gray-800 bg-gray-900/50">
+                  <div className="p-4">
+                    <div className="w-12 h-12 rounded-full bg-primary"></div>
+                  </div>
+                </div>
+                <div className="h-full w-full rounded-xl border border-gray-800 bg-gray-900/50">
+                  <div className="p-4 flex justify-end">
+                    <div className="w-24 h-24 rounded-xl bg-secondary"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
