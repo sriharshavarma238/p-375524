@@ -125,62 +125,111 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 bg-background/80 backdrop-blur-sm">
-        <div className="flex items-center gap-8">
-          <Logo />
-          <div className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-gray-300 hover:text-white transition-colors">
-              Features
-            </a>
-            <a href="#about" className="text-gray-300 hover:text-white transition-colors">
-              About
-            </a>
-            <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
-              Pricing
-            </a>
+      <nav 
+        className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-colors duration-300 bg-transparent"
+      >
+        <div className="flex items-center gap-8 w-full justify-between md:justify-start">
+          <div className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
+            <Logo />
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <ActionButton
-            variant="secondary"
-            onClick={handleGetStarted}
-            className="hidden md:block"
-          >
-            Get Started
-          </ActionButton>
-
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <button className="p-2 md:hidden">
-                <span className="sr-only">Open menu</span>
+          <div className="hidden md:flex items-center gap-8 text-base">
+            <button 
+              onClick={handleHome}
+              className={`relative group ${textColorClass}`}
+            >
+              <span className="relative z-10">Home</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+            </button>
+            <button 
+              onClick={() => scrollToSection("features")}
+              className={`relative group ${textColorClass}`}
+            >
+              <span className="relative z-10">Features</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+            </button>
+            <button 
+              onClick={() => scrollToSection("solutions")}
+              className={`relative group ${textColorClass}`}
+            >
+              <span className="relative z-10">Solutions</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                className={`flex items-center gap-1 group ${textColorClass}`}
+              >
+                <span className="relative z-10">Resources</span>
                 <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
+                  className={`w-4 h-4 transform transition-transform duration-300 ${
+                    isResourcesOpen ? 'rotate-180' : ''
+                  }`}
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    d="M3 12H21"
-                    stroke="currentColor"
-                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
                   />
+                </svg>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+              </button>
+              {isResourcesOpen && (
+                <div className="absolute w-48 bg-white shadow-lg mt-2 py-2 rounded-md animate-fade-in">
+                  <button 
+                    onClick={() => scrollToSection("blog")}
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    Blog
+                  </button>
+                  <button 
+                    onClick={() => scrollToSection("pricing")}
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    Pricing
+                  </button>
+                  <button 
+                    onClick={() => scrollToSection("contact")}
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    Contact Us
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4 ml-auto">
+            <ActionButton 
+              onClick={handleGetStarted}
+              className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg"
+            >
+              Get Started
+            </ActionButton>
+          </div>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                className={`md:hidden ${textColorClass}`}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
-                    d="M3 6H21"
-                    stroke="currentColor"
-                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3 18H21"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
               </button>
