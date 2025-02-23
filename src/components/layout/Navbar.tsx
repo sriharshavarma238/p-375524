@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -58,11 +59,10 @@ export const Navbar = () => {
 
   const handleNavigation = (sectionId: string) => {
     if (location.pathname !== '/') {
-      // If not on home page, navigate to home first
       window.location.href = `/?section=${sectionId}`;
     } else {
       scrollToSection(sectionId);
-      setIsMenuOpen(false); // Close mobile menu if open
+      setIsMenuOpen(false);
     }
   };
 
@@ -81,33 +81,35 @@ export const Navbar = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("Sending verification email to:", formData.email);
-      const { data, error } = await supabase.functions.invoke('send-verification', {
-        body: {
-          name: formData.name,
-          email: formData.email,
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            company_name: formData.company
+          }
         }
       });
 
-      if (error) {
-        console.error("Supabase function error:", error);
-        throw error;
+      if (signUpError) {
+        throw signUpError;
       }
 
-      console.log("Verification email response:", data);
-      
-      toast({
-        title: "Verification Email Sent",
-        description: `We've sent a verification email to ${formData.email}. Please check your inbox.`,
-      });
-      
-      setIsSignUpOpen(false);
-      setFormData({ email: "", name: "", password: "", company: "" });
-    } catch (error) {
+      if (signUpData.user) {
+        toast({
+          title: "Account Created Successfully",
+          description: "Please check your email for verification link.",
+        });
+        
+        setIsSignUpOpen(false);
+        setFormData({ email: "", name: "", password: "", company: "" });
+      }
+    } catch (error: any) {
       console.error("Signup error:", error);
       toast({
         title: "Error",
-        description: "Failed to send verification email. Please try again.",
+        description: error.message || "Failed to create account. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -278,7 +280,7 @@ export const Navbar = () => {
           <DialogHeader>
             <DialogTitle>Create an Account</DialogTitle>
             <DialogDescription>
-              Fill in your details to create your account and get started. You'll receive a verification email shortly.
+              Fill in your details to create your account and get started.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSignUpSubmit} className="space-y-4 pt-4">
