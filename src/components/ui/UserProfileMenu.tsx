@@ -235,10 +235,18 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.date_of_birth ? format(new Date(formData.date_of_birth), "PPP") : <span>Pick a date</span>}
+                      {formData.date_of_birth ? format(new Date(formData.date_of_birth), "MMMM d, yyyy") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-3 border-b">
+                      <div className="space-y-2">
+                        <Label>Date of Birth</Label>
+                        <div className="text-sm text-muted-foreground">
+                          Please select your date of birth
+                        </div>
+                      </div>
+                    </div>
                     <Calendar
                       mode="single"
                       selected={formData.date_of_birth ? new Date(formData.date_of_birth) : undefined}
@@ -250,13 +258,53 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
                       captionLayout="dropdown-buttons"
                       fromYear={fromYear}
                       toYear={toYear}
+                      classNames={{
+                        months: "space-y-4",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center gap-2",
+                        caption_label: "text-sm font-medium",
+                        nav: "flex items-center gap-1",
+                        nav_button: cn(
+                          "h-7 w-7 bg-transparent p-0 hover:opacity-70 transition-opacity"
+                        ),
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse",
+                        head_row: "flex",
+                        head_cell: "w-9 font-normal text-[0.8rem] text-muted-foreground",
+                        row: "flex w-full mt-2",
+                        cell: cn(
+                          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent",
+                          "first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+                        ),
+                        day: cn(
+                          "h-9 w-9 p-0 font-normal",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                          "disabled:opacity-50 disabled:pointer-events-none"
+                        ),
+                        day_range_end: "day-range-end",
+                        day_selected: cn(
+                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                          "focus:bg-primary focus:text-primary-foreground"
+                        ),
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_hidden: "invisible",
+                      }}
                     />
+                    <div className="p-3 border-t">
+                      <div className="text-xs text-muted-foreground">
+                        Use the year dropdown above to quickly navigate to your birth year
+                      </div>
+                    </div>
                   </PopoverContent>
                 </Popover>
               ) : (
                 <Input
                   id="dob"
-                  value={user.user_metadata?.date_of_birth ? format(new Date(user.user_metadata.date_of_birth), "PPP") : ''}
+                  value={user.user_metadata?.date_of_birth ? format(new Date(user.user_metadata.date_of_birth), "MMMM d, yyyy") : ''}
                   className="w-full"
                   disabled
                 />
