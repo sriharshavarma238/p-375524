@@ -9,19 +9,26 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useLocation } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
+import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signInError, setSignInError] = useState(false);
   const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     name: "",
     password: "",
     company: ""
+  });
+  const [signInData, setSignInData] = useState({
+    email: "",
+    password: ""
   });
   const { toast } = useToast();
 
@@ -58,11 +65,10 @@ export const Navbar = () => {
 
   const handleNavigation = (sectionId: string) => {
     if (location.pathname !== '/') {
-      // If not on home page, navigate to home first
       window.location.href = `/?section=${sectionId}`;
     } else {
       scrollToSection(sectionId);
-      setIsMenuOpen(false); // Close mobile menu if open
+      setIsMenuOpen(false);
     }
   };
 
@@ -118,6 +124,42 @@ export const Navbar = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSignInSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSignInError(false);
+
+    try {
+      const isValidUser = false;
+      
+      if (!isValidUser) {
+        setSignInError(true);
+        toast({
+          title: "Sign In Failed",
+          description: "Account not found. Please sign up if you're new here.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign in. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSignInInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignInData(prev => ({
       ...prev,
       [name]: value
     }));
@@ -200,11 +242,27 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-4 ml-auto">
             <ActionButton 
-              onClick={handleGetStarted}
-              className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg"
+              onClick={() => setIsSignInOpen(true)}
+              variant="secondary"
+              className={`${textColorClass} border-current hover:bg-white/10`}
             >
-              Get Started
+              Sign In
             </ActionButton>
+            <div className="flex items-center gap-2">
+              <ActionButton 
+                onClick={() => handleGetStarted()}
+                className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg"
+              >
+                Get Started
+              </ActionButton>
+              <ActionButton 
+                onClick={() => handleNavigation('home')}
+                variant="secondary"
+                className="text-white border-white hover:bg-white/10"
+              >
+                Request a Demo
+              </ActionButton>
+            </div>
           </div>
 
           <Sheet>
@@ -272,6 +330,68 @@ export const Navbar = () => {
           </Sheet>
         </div>
       </nav>
+
+      <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+        <DialogContent className={cn(
+          "sm:max-w-[425px] transition-all duration-300",
+          signInError && "animate-shake"
+        )}>
+          <DialogHeader>
+            <DialogTitle>Sign In</DialogTitle>
+            <DialogDescription>
+              Enter your credentials to access your account
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSignInSubmit} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="signin-email">Email</Label>
+              <Input
+                id="signin-email"
+                name="email"
+                type="email"
+                value={signInData.email}
+                onChange={handleSignInInputChange}
+                placeholder="Enter your email"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signin-password">Password</Label>
+              <Input
+                id="signin-password"
+                name="password"
+                type="password"
+                value={signInData.password}
+                onChange={handleSignInInputChange}
+                placeholder="Enter your password"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <ActionButton type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Signing In..." : "Sign In"}
+              </ActionButton>
+              {signInError && (
+                <div className="text-center">
+                  <p className="text-sm text-red-500 mb-2">Account not found</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignInOpen(false);
+                      setIsSignUpOpen(true);
+                    }}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Sign Up Instead
+                  </button>
+                </div>
+              )}
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
         <DialogContent className="sm:max-w-[425px]">
