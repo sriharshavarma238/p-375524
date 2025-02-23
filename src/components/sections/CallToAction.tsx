@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { ArrowRight, Check, Calendar, Clock, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Calendar, Clock, Loader2, ArrowLeft } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,7 @@ export const CallToAction = () => {
     email: "",
     company: "",
   });
+  const [consultationStep, setConsultationStep] = useState<'details' | 'calendar'>('details');
   const { toast } = useToast();
 
   const benefits = [
@@ -61,6 +62,11 @@ export const CallToAction = () => {
 
   const handleConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (consultationStep === 'details') {
+      setConsultationStep('calendar');
+      return;
+    }
+
     if (!consultationDate) {
       toast({
         variant: "destructive",
@@ -77,6 +83,7 @@ export const CallToAction = () => {
         description: `Great choice! Your consultation is set for ${format(consultationDate, 'MMMM dd, yyyy')}. Check your email for meeting details.`,
       });
       setShowConsultationDialog(false);
+      setConsultationStep('details');
       setConsultationDate(undefined);
       setFormData({ name: "", email: "", company: "" });
     } catch (error) {
@@ -88,6 +95,12 @@ export const CallToAction = () => {
     } finally {
       setIsSubmittingConsultation(false);
     }
+  };
+
+  const handleCloseConsultation = () => {
+    setShowConsultationDialog(false);
+    setConsultationStep('details');
+    setConsultationDate(undefined);
   };
 
   return (
@@ -267,55 +280,75 @@ export const CallToAction = () => {
       </Dialog>
 
       {/* Consultation Dialog */}
-      <Dialog open={showConsultationDialog} onOpenChange={setShowConsultationDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={showConsultationDialog} onOpenChange={handleCloseConsultation}>
+        <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Schedule a Consultation</DialogTitle>
-            <DialogDescription>
-              Book a personalized demo with our AI experts to discuss your needs.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleConsultationSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cons-name">Full Name</Label>
-              <Input
-                id="cons-name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cons-email">Email</Label>
-              <Input
-                id="cons-email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cons-company">Company Name</Label>
-              <Input
-                id="cons-company"
-                required
-                value={formData.company}
-                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Select Date</Label>
-              <div className="border rounded-md p-4">
-                <CalendarComponent
-                  mode="single"
-                  selected={consultationDate}
-                  onSelect={setConsultationDate}
-                  disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
-                  className="rounded-md border"
-                />
+            <div className="flex items-center gap-2">
+              {consultationStep === 'calendar' && (
+                <button
+                  onClick={() => setConsultationStep('details')}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div>
+                <DialogTitle>Schedule a Consultation</DialogTitle>
+                <DialogDescription>
+                  {consultationStep === 'details' 
+                    ? "Fill in your details to proceed with booking."
+                    : "Choose your preferred consultation date."}
+                </DialogDescription>
               </div>
             </div>
+          </DialogHeader>
+
+          <form onSubmit={handleConsultationSubmit} className="space-y-4">
+            {consultationStep === 'details' ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="cons-name">Full Name</Label>
+                  <Input
+                    id="cons-name"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cons-email">Email</Label>
+                  <Input
+                    id="cons-email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cons-company">Company Name</Label>
+                  <Input
+                    id="cons-company"
+                    required
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label>Select Date</Label>
+                <div className="border rounded-md p-4">
+                  <CalendarComponent
+                    mode="single"
+                    selected={consultationDate}
+                    onSelect={setConsultationDate}
+                    disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
+                    className="rounded-md border"
+                  />
+                </div>
+              </div>
+            )}
             <DialogFooter>
               <ActionButton 
                 type="submit" 
@@ -329,7 +362,7 @@ export const CallToAction = () => {
                     Booking...
                   </div>
                 ) : (
-                  <span>Book Consultation</span>
+                  <span>{consultationStep === 'details' ? 'Next' : 'Book Consultation'}</span>
                 )}
               </ActionButton>
             </DialogFooter>
