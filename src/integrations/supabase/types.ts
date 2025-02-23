@@ -99,6 +99,36 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_registrations: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

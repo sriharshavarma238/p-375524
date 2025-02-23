@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { ArrowRight, Check, Calendar, Clock, Loader2, ArrowLeft, CreditCard } from "lucide-react";
@@ -16,6 +17,13 @@ import { useToast } from "@/hooks/use-toast";
 import { addDays, format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+
+interface TrialRegistration {
+  user_id: string;
+  name: string;
+  email: string;
+  company: string;
+}
 
 export const CallToAction = () => {
   const [showTrialDialog, setShowTrialDialog] = useState(false);
@@ -55,16 +63,16 @@ export const CallToAction = () => {
         return;
       }
 
-      const { data: trialData, error: trialError } = await supabase
+      const trialData: TrialRegistration = {
+        user_id: session.user.id,
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+      };
+
+      const { error: trialError } = await supabase
         .from('trial_registrations')
-        .insert({
-          user_id: session.user.id,
-          name: formData.name,
-          email: formData.email,
-          company: formData.company,
-        })
-        .select()
-        .single();
+        .insert(trialData);
 
       if (trialError) {
         if (trialError.code === '23505') {
