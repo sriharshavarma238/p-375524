@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { ArrowRight, Check, Calendar, Clock } from "lucide-react";
+import { ArrowRight, Check, Calendar, Clock, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,10 @@ export const CallToAction = () => {
   const [showTrialDialog, setShowTrialDialog] = useState(false);
   const [showConsultationDialog, setShowConsultationDialog] = useState(false);
   const [consultationDate, setConsultationDate] = useState<Date>();
+  const [isSubmittingTrial, setIsSubmittingTrial] = useState(false);
+  const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
+  const [isHoveringTrial, setIsHoveringTrial] = useState(false);
+  const [isHoveringConsultation, setIsHoveringConsultation] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,21 +39,23 @@ export const CallToAction = () => {
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingTrial(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       toast({
-        title: "Trial Activation Successful!",
-        description: "Check your email for login credentials and next steps.",
+        title: "Trial Activation Successful! 🎉",
+        description: "Welcome aboard! Check your email for login credentials and next steps.",
       });
       setShowTrialDialog(false);
       setFormData({ name: "", email: "", company: "" });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Oops! Something went wrong",
         description: "Failed to activate trial. Please try again.",
       });
+    } finally {
+      setIsSubmittingTrial(false);
     }
   };
 
@@ -59,17 +64,17 @@ export const CallToAction = () => {
     if (!consultationDate) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please select a consultation date.",
+        title: "Select a Date",
+        description: "Please select a consultation date to proceed.",
       });
       return;
     }
+    setIsSubmittingConsultation(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       toast({
-        title: "Consultation Scheduled!",
-        description: `Your consultation is scheduled for ${format(consultationDate, 'MMMM dd, yyyy')}. Check your email for meeting details.`,
+        title: "Consultation Scheduled! 📅",
+        description: `Great choice! Your consultation is set for ${format(consultationDate, 'MMMM dd, yyyy')}. Check your email for meeting details.`,
       });
       setShowConsultationDialog(false);
       setConsultationDate(undefined);
@@ -77,9 +82,11 @@ export const CallToAction = () => {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to schedule consultation. Please try again.",
+        title: "Booking Failed",
+        description: "Unable to schedule consultation. Please try again.",
       });
+    } finally {
+      setIsSubmittingConsultation(false);
     }
   };
 
@@ -117,17 +124,42 @@ export const CallToAction = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <ActionButton 
                 variant="primary" 
-                className="group"
+                className={`group relative overflow-hidden transition-all duration-300 ease-out ${
+                  isHoveringTrial ? 'scale-105' : ''
+                }`}
                 onClick={() => setShowTrialDialog(true)}
+                onMouseEnter={() => setIsHoveringTrial(true)}
+                onMouseLeave={() => setIsHoveringTrial(false)}
               >
-                Start Free Trial
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Free Trial
+                  <ArrowRight 
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isHoveringTrial ? 'translate-x-1' : ''
+                    }`}
+                  />
+                </span>
+                <div 
+                  className={`absolute inset-0 bg-black transform transition-transform duration-300 ${
+                    isHoveringTrial ? 'scale-x-100' : 'scale-x-0'
+                  } origin-left`}
+                />
               </ActionButton>
               <ActionButton 
                 variant="secondary"
+                className={`group relative overflow-hidden transition-all duration-300 ease-out ${
+                  isHoveringConsultation ? 'scale-105' : ''
+                }`}
                 onClick={() => setShowConsultationDialog(true)}
+                onMouseEnter={() => setIsHoveringConsultation(true)}
+                onMouseLeave={() => setIsHoveringConsultation(false)}
               >
-                Schedule Consultation
+                <span className="relative z-10 flex items-center gap-2">
+                  <Calendar className={`w-4 h-4 transition-transform duration-300 ${
+                    isHoveringConsultation ? 'scale-110' : ''
+                  }`} />
+                  Schedule Consultation
+                </span>
               </ActionButton>
             </div>
           </div>
@@ -214,8 +246,20 @@ export const CallToAction = () => {
               />
             </div>
             <DialogFooter>
-              <ActionButton type="submit" variant="primary">
-                Activate Trial
+              <ActionButton 
+                type="submit" 
+                variant="primary"
+                disabled={isSubmittingTrial}
+                className="relative"
+              >
+                {isSubmittingTrial ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Activating...
+                  </div>
+                ) : (
+                  <span>Activate Trial</span>
+                )}
               </ActionButton>
             </DialogFooter>
           </form>
@@ -273,8 +317,20 @@ export const CallToAction = () => {
               </div>
             </div>
             <DialogFooter>
-              <ActionButton type="submit" variant="primary">
-                Book Consultation
+              <ActionButton 
+                type="submit" 
+                variant="primary"
+                disabled={isSubmittingConsultation}
+                className="relative"
+              >
+                {isSubmittingConsultation ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Booking...
+                  </div>
+                ) : (
+                  <span>Book Consultation</span>
+                )}
               </ActionButton>
             </DialogFooter>
           </form>
