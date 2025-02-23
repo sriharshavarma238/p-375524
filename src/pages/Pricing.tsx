@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -5,21 +6,64 @@ import { ActionButton } from "@/components/ui/ActionButton";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 const Pricing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+  });
 
-  const handleGetStarted = async (planId: string) => {
+  const handleSubscriptionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlan) return;
+
+    setIsLoading(selectedPlan);
     try {
-      setIsLoading(planId);
-      console.log('Initiating checkout for plan:', planId);
+      // First, save subscription details to Supabase
+      const { data: subscriptionData, error: subscriptionError } = await supabase
+        .from('subscriptions')
+        .insert([
+          {
+            plan_id: selectedPlan,
+            customer_name: formData.name,
+            email: formData.email,
+            company_name: formData.company,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
 
+      if (subscriptionError) {
+        console.error('Supabase error:', subscriptionError);
+        throw new Error('Failed to save subscription details');
+      }
+
+      // Then create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
-          planId,
-          origin: window.location.origin 
+          planId: selectedPlan,
+          origin: window.location.origin,
+          subscriptionId: subscriptionData.id,
+          customerName: formData.name,
+          customerEmail: formData.email
         },
       });
 
@@ -33,7 +77,6 @@ const Pricing = () => {
         throw new Error('No checkout URL received from server');
       }
 
-      console.log('Redirecting to checkout URL:', data.url);
       window.location.href = data.url;
     } catch (error: any) {
       console.error('Checkout error:', error);
@@ -45,6 +88,21 @@ const Pricing = () => {
     } finally {
       setIsLoading(null);
     }
+  };
+
+  const handleGetStarted = (planId: string) => {
+    setSelectedPlan(planId);
+    setShowDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+    setSelectedPlan(null);
+    setFormData({
+      name: "",
+      email: "",
+      company: "",
+    });
   };
 
   return (
@@ -166,6 +224,66 @@ const Pricing = () => {
           </div>
         </div>
       </main>
+
+      <Dialog open={showDialog} onOpenChange={handleCloseDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Complete Your Subscription</DialogTitle>
+            <DialogDescription>
+              Please provide your details to continue with the subscription process.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubscriptionSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                required
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              />
+            </div>
+
+            <DialogFooter>
+              <ActionButton 
+                type="submit" 
+                variant="primary"
+                disabled={isLoading === selectedPlan}
+                className="w-full"
+              >
+                {isLoading === selectedPlan ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </div>
+                ) : (
+                  'Continue to Payment'
+                )}
+              </ActionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
