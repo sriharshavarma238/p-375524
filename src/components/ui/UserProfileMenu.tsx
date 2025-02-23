@@ -28,8 +28,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UserCircle, Settings, LogOut, Building, Mail, Calendar, CreditCard, User } from "lucide-react";
-import { formatDistance } from 'date-fns';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { UserCircle, Settings, LogOut, Building, Mail, CalendarIcon, CreditCard, User } from "lucide-react";
+import { formatDistance, format } from 'date-fns';
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfileMenuProps {
@@ -90,6 +93,15 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
       ...prev,
       gender: value
     }));
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({
+        ...prev,
+        date_of_birth: format(date, 'yyyy-MM-dd')
+      }));
+    }
   };
   
   return (
@@ -213,15 +225,40 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
             </div>
             <div className="grid gap-2">
               <Label htmlFor="dob">Date of Birth</Label>
-              <Input
-                id="dob"
-                name="date_of_birth"
-                type="date"
-                value={isEditing ? formData.date_of_birth : user.user_metadata?.date_of_birth || ''}
-                onChange={handleChange}
-                className="w-full"
-                disabled={!isEditing}
-              />
+              {isEditing ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.date_of_birth && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date_of_birth ? format(new Date(formData.date_of_birth), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date_of_birth ? new Date(formData.date_of_birth) : undefined}
+                      onSelect={handleDateChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Input
+                  id="dob"
+                  value={user.user_metadata?.date_of_birth ? format(new Date(user.user_metadata.date_of_birth), "PPP") : ''}
+                  className="w-full"
+                  disabled
+                />
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="joined">Member Since</Label>
