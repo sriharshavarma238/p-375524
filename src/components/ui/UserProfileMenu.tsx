@@ -16,11 +16,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { UserCircle, Settings, LogOut, Building, Mail, Calendar, CreditCard, User } from "lucide-react";
 import { formatDistance } from 'date-fns';
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfileMenuProps {
   user: any;
@@ -30,7 +33,40 @@ interface UserProfileMenuProps {
 
 export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileMenuProps) => {
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: user.user_metadata?.full_name || '',
+    gender: user.user_metadata?.gender || '',
+    date_of_birth: user.user_metadata?.date_of_birth || '',
+  });
   const joinedDate = user.created_at ? formatDistance(new Date(user.created_at), new Date(), { addSuffix: true }) : '';
+
+  const handleSave = async () => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: formData.full_name,
+          gender: formData.gender,
+          date_of_birth: formData.date_of_birth,
+        }
+      });
+
+      if (error) throw error;
+      
+      setIsEditing(false);
+      // Force a page reload to update the user data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
   
   return (
     <>
@@ -48,7 +84,10 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
             <DropdownMenuSubContent className="w-[280px] p-2">
               {/* Personal Information Section */}
               <DropdownMenuItem 
-                onClick={() => setShowPersonalInfo(true)}
+                onClick={() => {
+                  setShowPersonalInfo(true);
+                  setIsEditing(false);
+                }}
                 className="cursor-pointer flex items-center gap-2 p-2 mb-1"
               >
                 <User className="h-4 w-4" />
@@ -85,23 +124,36 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Personal Information</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Personal Information</span>
+              {!isEditing && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditing(true)}
+                  className="text-sm"
+                >
+                  Edit Profile
+                </Button>
+              )}
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
-                defaultValue={user.user_metadata?.full_name || ''}
+                name="full_name"
+                value={isEditing ? formData.full_name : user.user_metadata?.full_name || ''}
+                onChange={handleChange}
                 className="w-full"
-                disabled
+                disabled={!isEditing}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                defaultValue={user.email}
+                value={user.email}
                 className="w-full"
                 disabled
               />
@@ -110,18 +162,23 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               <Label htmlFor="gender">Gender</Label>
               <Input
                 id="gender"
-                defaultValue={user.user_metadata?.gender || 'Not specified'}
+                name="gender"
+                value={isEditing ? formData.gender : user.user_metadata?.gender || 'Not specified'}
+                onChange={handleChange}
                 className="w-full"
-                disabled
+                disabled={!isEditing}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="dob">Date of Birth</Label>
               <Input
                 id="dob"
-                defaultValue={user.user_metadata?.date_of_birth || 'Not specified'}
+                name="date_of_birth"
+                type="date"
+                value={isEditing ? formData.date_of_birth : user.user_metadata?.date_of_birth || ''}
+                onChange={handleChange}
                 className="w-full"
-                disabled
+                disabled={!isEditing}
               />
             </div>
             <div className="grid gap-2">
@@ -134,6 +191,12 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               />
             </div>
           </div>
+          {isEditing && (
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+              <Button onClick={handleSave}>Save Changes</Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </>
