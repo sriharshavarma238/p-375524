@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { ArrowRight, Check, Calendar, Clock, Loader2, ArrowLeft, CreditCard } from "lucide-react";
@@ -25,49 +24,105 @@ interface TrialRegistration {
   company: string;
 }
 
+interface DemoRequest {
+  contact_name: string;
+  email: string;
+  company_name: string;
+  company_size: string;
+  phone_number: string;
+  business_challenge: string;
+}
+
 export const CallToAction = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [showTrialDialog, setShowTrialDialog] = useState(false);
-  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
-  const [consultationDate, setConsultationDate] = useState<Date>();
+  const [showDemoDialog, setShowDemoDialog] = useState(false);
   const [isSubmittingTrial, setIsSubmittingTrial] = useState(false);
-  const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
-  const [isHoveringTrial, setIsHoveringTrial] = useState(false);
-  const [isHoveringConsultation, setIsHoveringConsultation] = useState(false);
-  const [trialStep, setTrialStep] = useState<'details' | 'payment'>('details');
-  const [consultationStep, setConsultationStep] = useState<'details' | 'calendar'>('details');
-  const [formData, setFormData] = useState({
+  const [isSubmittingDemo, setIsSubmittingDemo] = useState(false);
+  const [trialFormData, setTrialFormData] = useState({
     name: "",
     email: "",
     company: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
   });
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [demoFormData, setDemoFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    companySize: "",
+    phone: "",
+    message: "",
+    preferredDate: new Date(),
+  });
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
+    new Date()
+  );
+
+  const handleDemoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingDemo(true);
+
+    try {
+      const demoData: DemoRequest = {
+        contact_name: demoFormData.name,
+        email: demoFormData.email,
+        company_name: demoFormData.company,
+        company_size: demoFormData.companySize,
+        phone_number: demoFormData.phone,
+        business_challenge: demoFormData.message
+      };
+
+      const { error: demoError } = await supabase
+        .from('demo_requests')
+        .insert(demoData);
+
+      if (demoError) {
+        throw demoError;
+      }
+
+      toast({
+        title: "Consultation Request Submitted! 🎉",
+        description: "We'll get back to you shortly to schedule your consultation.",
+      });
+      
+      setShowDemoDialog(false);
+      setDemoFormData({
+        name: "",
+        email: "",
+        company: "",
+        companySize: "",
+        phone: "",
+        message: "",
+        preferredDate: new Date(),
+      });
+    } catch (error: any) {
+      console.error('Demo request error:', error);
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: "Failed to submit consultation request. Please try again.",
+      });
+    } finally {
+      setIsSubmittingDemo(false);
+    }
+  };
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (trialStep === 'details') {
-      setTrialStep('payment');
-      return;
-    }
-
     setIsSubmittingTrial(true);
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        localStorage.setItem('pendingTrialRegistration', JSON.stringify(formData));
-        navigate('/auth');
-        return;
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('You must be logged in to register for a trial');
       }
 
       const trialData: TrialRegistration = {
-        user_id: session.user.id,
-        name: formData.name,
-        email: formData.email,
-        company: formData.company,
+        user_id: user.id,
+        name: trialFormData.name,
+        email: trialFormData.email,
+        company: trialFormData.company,
       };
 
       const { error: trialError } = await supabase
@@ -75,348 +130,119 @@ export const CallToAction = () => {
         .insert(trialData);
 
       if (trialError) {
-        if (trialError.code === '23505') {
-          throw new Error('This email is already registered for a trial.');
-        }
         throw trialError;
       }
 
       toast({
-        title: "Trial Activation Successful! 🎉",
-        description: "Welcome aboard! Check your email for login credentials and next steps.",
+        title: "Trial Registration Successful! 🎉",
+        description: "You're all set to start your free trial.",
       });
-      
       setShowTrialDialog(false);
-      setTrialStep('details');
-      setFormData({
+      setTrialFormData({
         name: "",
         email: "",
         company: "",
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
       });
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Trial registration error:', error);
       toast({
         variant: "destructive",
-        title: "Oops! Something went wrong",
-        description: error.message || "Failed to activate trial. Please try again.",
+        title: "Registration Failed",
+        description: error?.message || "Failed to register for trial. Please try again.",
       });
     } finally {
       setIsSubmittingTrial(false);
     }
   };
 
-  const handleCloseTrialDialog = () => {
-    setShowTrialDialog(false);
-    setTrialStep('details');
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-    });
-  };
-
-  const handleConsultationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (consultationStep === 'details') {
-      setConsultationStep('calendar');
-      return;
-    }
-
-    if (!consultationDate) {
-      toast({
-        variant: "destructive",
-        title: "Select a Date",
-        description: "Please select a consultation date to proceed.",
-      });
-      return;
-    }
-    setIsSubmittingConsultation(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast({
-        title: "Consultation Scheduled! 📅",
-        description: `Great choice! Your consultation is set for ${format(consultationDate, 'MMMM dd, yyyy')}. Check your email for meeting details.`,
-      });
-      setShowConsultationDialog(false);
-      setConsultationStep('details');
-      setConsultationDate(undefined);
-      setFormData({
-        name: "",
-        email: "",
-        company: "",
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Booking Failed",
-        description: "Unable to schedule consultation. Please try again.",
-      });
-    } finally {
-      setIsSubmittingConsultation(false);
-    }
-  };
-
-  const handleCloseConsultation = () => {
-    setShowConsultationDialog(false);
-    setConsultationStep('details');
-    setConsultationDate(undefined);
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-    });
-  };
-
-  const benefits = [
-    "Access to enterprise-grade AI models",
-    "Real-time market analysis and insights",
-    "Dedicated support team",
-    "Customizable analytics dashboard"
-  ];
-
   return (
-    <section className="bg-gradient-to-br from-blue-50 to-white w-full py-28 px-4 md:px-16">
-      <div className="max-w-[1440px] mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="inline-block px-4 py-2 bg-blue-100 rounded-full">
-              <span className="text-blue-700 font-semibold">
-                Limited Time Offer
-              </span>
-            </div>
-            
-            <h2 className="text-4xl font-bold leading-tight">
-              Transform Your Financial Strategy with AI-Driven Insights
+    <section className="py-12 bg-white dark:bg-gray-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="lg:flex lg:items-center lg:justify-between">
+          <div className="mb-8 lg:mb-0">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+              Ready to transform your business?
             </h2>
-            
-            <p className="text-lg text-gray-600">
-              Join leading financial institutions leveraging our AI technology for 
-              enhanced decision-making and market predictions.
+            <p className="mt-3 text-lg text-gray-500 dark:text-gray-300">
+              Start your free trial today and see the impact. No credit card
+              required.
             </p>
-
-            <ul className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">{benefit}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <ActionButton 
-                variant="primary" 
-                className={`group relative overflow-hidden transition-all duration-300 ease-out ${
-                  isHoveringTrial ? 'scale-105' : ''
-                }`}
-                onClick={() => setShowTrialDialog(true)}
-                onMouseEnter={() => setIsHoveringTrial(true)}
-                onMouseLeave={() => setIsHoveringTrial(false)}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Start Free Trial
-                  <ArrowRight 
-                    className={`w-4 h-4 transition-transform duration-300 ${
-                      isHoveringTrial ? 'translate-x-1' : ''
-                    }`}
-                  />
-                </span>
-                <div 
-                  className={`absolute inset-0 bg-black transform transition-transform duration-300 ${
-                    isHoveringTrial ? 'scale-x-100' : 'scale-x-0'
-                  } origin-left`}
-                />
-              </ActionButton>
-              <ActionButton 
-                variant="secondary"
-                className={`group relative overflow-hidden transition-all duration-300 ease-out ${
-                  isHoveringConsultation ? 'scale-105' : ''
-                }`}
-                onClick={() => setShowConsultationDialog(true)}
-                onMouseEnter={() => setIsHoveringConsultation(true)}
-                onMouseLeave={() => setIsHoveringConsultation(false)}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Calendar className={`w-4 h-4 transition-transform duration-300 ${
-                    isHoveringConsultation ? 'scale-110' : ''
-                  }`} />
-                  Schedule Consultation
-                </span>
-              </ActionButton>
-            </div>
           </div>
-
-          <div className="relative">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-50" />
-            <div className="relative bg-white rounded-2xl shadow-xl p-8 space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold">Enterprise Analytics Dashboard</h3>
-                <p className="text-gray-600">
-                  Real-time monitoring of key financial metrics and AI-powered predictions
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">94%</div>
-                  <div className="text-sm text-gray-600">Prediction Accuracy</div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">2.5x</div>
-                  <div className="text-sm text-gray-600">ROI Improvement</div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">24/7</div>
-                  <div className="text-sm text-gray-600">Market Monitoring</div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">1M+</div>
-                  <div className="text-sm text-gray-600">Data Points/Day</div>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full w-[85%] bg-blue-500 rounded-full" />
-                </div>
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>Current System Load</span>
-                  <span>85%</span>
-                </div>
-              </div>
-            </div>
+          <div className="space-x-3">
+            <ActionButton onClick={() => setShowTrialDialog(true)}>
+              Start Free Trial
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
+              onClick={() => setShowDemoDialog(true)}
+            >
+              Request a Consultation
+            </ActionButton>
           </div>
         </div>
       </div>
 
-      {/* Trial Dialog */}
-      <Dialog open={showTrialDialog} onOpenChange={handleCloseTrialDialog}>
+      {/* Trial Registration Dialog */}
+      <Dialog open={showTrialDialog} onOpenChange={setShowTrialDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <div className="flex items-center gap-2">
-              {trialStep === 'payment' && (
-                <button
-                  onClick={() => setTrialStep('details')}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-              )}
-              <div>
-                <DialogTitle>Start Your Free Trial</DialogTitle>
-                <DialogDescription>
-                  {trialStep === 'details' 
-                    ? "Get 14 days of unlimited access to our AI-powered financial analytics platform."
-                    : "Add your payment details for when the trial ends."}
-                </DialogDescription>
-              </div>
-            </div>
+            <DialogTitle>Start Your Free Trial</DialogTitle>
+            <DialogDescription>
+              Enter your details to begin your free trial.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleTrialSubmit} className="space-y-4">
-            {trialStep === 'details' ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company">Company Name</Label>
-                  <Input
-                    id="company"
-                    required
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Card Number</Label>
-                  <div className="relative">
-                    <Input
-                      id="cardNumber"
-                      required
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                      className="pl-10"
-                    />
-                    <CreditCard className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryDate">Expiry Date</Label>
-                    <Input
-                      id="expiryDate"
-                      required
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
-                      onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv">CVV</Label>
-                    <Input
-                      id="cvv"
-                      required
-                      type="password"
-                      maxLength={4}
-                      placeholder="123"
-                      value={formData.cvv}
-                      onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  Your card won't be charged during the trial. After 14 days, your subscription will begin automatically.
-                </p>
-              </>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                required
+                value={trialFormData.name}
+                onChange={(e) =>
+                  setTrialFormData({ ...trialFormData, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john.doe@example.com"
+                required
+                value={trialFormData.email}
+                onChange={(e) =>
+                  setTrialFormData({ ...trialFormData, email: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                placeholder="Acme Corp"
+                required
+                value={trialFormData.company}
+                onChange={(e) =>
+                  setTrialFormData({ ...trialFormData, company: e.target.value })
+                }
+              />
+            </div>
             <DialogFooter>
-              <ActionButton 
-                type="submit" 
-                variant="primary"
+              <ActionButton
+                type="submit"
                 disabled={isSubmittingTrial}
-                className="relative"
+                className="w-full"
               >
                 {isSubmittingTrial ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Activating...
+                    Registering...
                   </div>
                 ) : (
-                  <span>{trialStep === 'details' ? 'Next' : 'Start Trial'}</span>
+                  "Start Trial"
                 )}
               </ActionButton>
             </DialogFooter>
@@ -424,90 +250,106 @@ export const CallToAction = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Consultation Dialog */}
-      <Dialog open={showConsultationDialog} onOpenChange={handleCloseConsultation}>
-        <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
+      {/* Consultation Request Dialog */}
+      <Dialog open={showDemoDialog} onOpenChange={setShowDemoDialog}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <div className="flex items-center gap-2">
-              {consultationStep === 'calendar' && (
-                <button
-                  onClick={() => setConsultationStep('details')}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-              )}
-              <div>
-                <DialogTitle>Schedule a Consultation</DialogTitle>
-                <DialogDescription>
-                  {consultationStep === 'details' 
-                    ? "Fill in your details to proceed with booking."
-                    : "Choose your preferred consultation date."}
-                </DialogDescription>
-              </div>
-            </div>
+            <DialogTitle>Request a Consultation</DialogTitle>
+            <DialogDescription>
+              Schedule a free consultation with one of our experts.
+            </DialogDescription>
           </DialogHeader>
-
-          <form onSubmit={handleConsultationSubmit} className="space-y-4">
-            {consultationStep === 'details' ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="cons-name">Full Name</Label>
-                  <Input
-                    id="cons-name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cons-email">Email</Label>
-                  <Input
-                    id="cons-email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cons-company">Company Name</Label>
-                  <Input
-                    id="cons-company"
-                    required
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="space-y-2">
-                <Label>Select Date</Label>
-                <div className="border rounded-md p-4">
-                  <CalendarComponent
-                    mode="single"
-                    selected={consultationDate}
-                    onSelect={setConsultationDate}
-                    disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
-                    className="rounded-md border"
-                  />
-                </div>
-              </div>
-            )}
+          <form onSubmit={handleDemoSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                required
+                value={demoFormData.name}
+                onChange={(e) =>
+                  setDemoFormData({ ...demoFormData, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john.doe@example.com"
+                required
+                value={demoFormData.email}
+                onChange={(e) =>
+                  setDemoFormData({ ...demoFormData, email: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                placeholder="Acme Corp"
+                required
+                value={demoFormData.company}
+                onChange={(e) =>
+                  setDemoFormData({ ...demoFormData, company: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companySize">Company Size</Label>
+              <Input
+                id="companySize"
+                placeholder="1-50"
+                required
+                value={demoFormData.companySize}
+                onChange={(e) =>
+                  setDemoFormData({
+                    ...demoFormData,
+                    companySize: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                required
+                value={demoFormData.phone}
+                onChange={(e) =>
+                  setDemoFormData({ ...demoFormData, phone: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="message">Business Challenge</Label>
+              <Input
+                id="message"
+                placeholder="What challenges are you facing?"
+                required
+                value={demoFormData.message}
+                onChange={(e) =>
+                  setDemoFormData({ ...demoFormData, message: e.target.value })
+                }
+              />
+            </div>
             <DialogFooter>
-              <ActionButton 
-                type="submit" 
-                variant="primary"
-                disabled={isSubmittingConsultation}
-                className="relative"
+              <ActionButton
+                type="submit"
+                disabled={isSubmittingDemo}
+                className="w-full"
               >
-                {isSubmittingConsultation ? (
+                {isSubmittingDemo ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Booking...
+                    Submitting...
                   </div>
                 ) : (
-                  <span>{consultationStep === 'details' ? 'Next' : 'Book Consultation'}</span>
+                  "Request Consultation"
                 )}
               </ActionButton>
             </DialogFooter>
