@@ -27,6 +27,9 @@ const Pricing = () => {
     name: "",
     email: "",
     company: "",
+    phone: "",
+    companySize: "",
+    businessChallenge: "",
   });
 
   useEffect(() => {
@@ -49,6 +52,28 @@ const Pricing = () => {
 
     setIsLoading(selectedPlan);
     try {
+      if (selectedPlan === 'enterprise') {
+        const { error: demoError } = await supabase
+          .from('demo_requests')
+          .insert({
+            contact_name: formData.name,
+            email: formData.email,
+            company_name: formData.company,
+            company_size: formData.companySize || 'Not specified',
+            phone_number: formData.phone || 'Not provided',
+            business_challenge: formData.businessChallenge || 'Not provided'
+          });
+
+        if (demoError) throw demoError;
+
+        toast({
+          title: "Consultation Request Submitted",
+          description: "We'll contact you soon to discuss your enterprise needs.",
+        });
+        handleCloseDialog();
+        return;
+      }
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
@@ -118,6 +143,9 @@ const Pricing = () => {
       name: "",
       email: "",
       company: "",
+      phone: "",
+      companySize: "",
+      businessChallenge: "",
     });
   };
 
@@ -244,9 +272,15 @@ const Pricing = () => {
       <Dialog open={showDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Complete Your Subscription</DialogTitle>
+            <DialogTitle>
+              {selectedPlan === 'enterprise' 
+                ? 'Schedule a Consultation' 
+                : 'Complete Your Subscription'}
+            </DialogTitle>
             <DialogDescription>
-              Please provide your details to continue with the subscription process.
+              {selectedPlan === 'enterprise'
+                ? 'Please provide your details to schedule a consultation with our team.'
+                : 'Please provide your details to continue with the subscription process.'}
             </DialogDescription>
           </DialogHeader>
           
@@ -280,6 +314,38 @@ const Pricing = () => {
               />
             </div>
 
+            {selectedPlan === 'enterprise' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companySize">Company Size</Label>
+                  <Input
+                    id="companySize"
+                    placeholder="e.g. 50-100 employees"
+                    value={formData.companySize}
+                    onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="businessChallenge">Business Challenge</Label>
+                  <Input
+                    id="businessChallenge"
+                    placeholder="Tell us about your needs"
+                    value={formData.businessChallenge}
+                    onChange={(e) => setFormData({ ...formData, businessChallenge: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
+
             <DialogFooter>
               <ActionButton 
                 type="submit" 
@@ -290,10 +356,10 @@ const Pricing = () => {
                 {isLoading === selectedPlan ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    {selectedPlan === 'enterprise' ? 'Submitting...' : 'Processing...'}
                   </div>
                 ) : (
-                  'Continue to Payment'
+                  selectedPlan === 'enterprise' ? 'Submit Request' : 'Continue to Payment'
                 )}
               </ActionButton>
             </DialogFooter>
