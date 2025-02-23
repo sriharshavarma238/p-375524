@@ -22,13 +22,13 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-2 pb-4 relative items-center border-b",
         caption_label: "text-base font-semibold",
-        nav: "space-x-1 flex items-center",
+        nav: "space-x-1 flex items-center absolute right-0 left-0 justify-between px-2",
         nav_button: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 w-8 bg-transparent p-0 hover:bg-accent/50 transition-colors"
+          "h-8 w-8 bg-transparent p-0 hover:bg-accent/50 transition-colors rounded-full"
         ),
-        nav_button_previous: "absolute left-2",
-        nav_button_next: "absolute right-2",
+        nav_button_previous: "",
+        nav_button_next: "",
         table: "w-full border-collapse mt-2",
         head_row: "flex w-full",
         head_cell: "text-muted-foreground w-10 font-medium text-[0.875rem] py-2",
@@ -43,7 +43,6 @@ function Calendar({
           "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
           "disabled:opacity-50 disabled:pointer-events-none"
         ),
-        day_range_end: "day-range-end",
         day_selected: cn(
           "bg-primary text-primary-foreground hover:bg-primary/90",
           "focus:bg-primary focus:text-primary-foreground rounded-full"
@@ -53,7 +52,7 @@ function Calendar({
         day_disabled: "text-muted-foreground/50 opacity-30",
         day_range_middle: "aria-selected:bg-accent/50",
         day_hidden: "invisible",
-        caption_dropdowns: "dropdown-buttons inline-flex gap-2",
+        caption_dropdowns: "dropdown-buttons inline-flex gap-2 z-10",
         dropdown: cn(
           "appearance-none outline-none inline-flex bg-transparent",
           "px-3 py-1 text-sm font-medium text-center cursor-pointer",
@@ -64,8 +63,16 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4 stroke-2" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4 stroke-2" />,
+        IconLeft: ({ ...props }) => (
+          <button {...props} className="absolute left-2">
+            <ChevronLeft className="h-4 w-4 stroke-2" />
+          </button>
+        ),
+        IconRight: ({ ...props }) => (
+          <button {...props} className="absolute right-2">
+            <ChevronRight className="h-4 w-4 stroke-2" />
+          </button>
+        ),
       }}
       {...props}
     />
