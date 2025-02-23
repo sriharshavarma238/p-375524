@@ -1,15 +1,22 @@
-
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useLocation } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,12 +24,19 @@ export const Navbar = () => {
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginError, setLoginError] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     name: "",
     password: "",
     company: ""
+  });
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: ""
   });
   const { toast } = useToast();
 
@@ -125,6 +139,45 @@ export const Navbar = () => {
     }));
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError(false);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        setLoginError(true);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "This account doesn't exist or the credentials are incorrect.",
+        });
+        return;
+      }
+
+      setShowLoginModal(false);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+      
+    } catch (error: any) {
+      setLoginError(true);
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message,
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
   const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
 
   return (
@@ -201,6 +254,13 @@ export const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4 ml-auto">
+            <ActionButton 
+              onClick={() => setShowLoginModal(true)}
+              variant="secondary"
+              className="transform hover:scale-105 transition-all duration-200"
+            >
+              Login
+            </ActionButton>
             <ActionButton 
               onClick={handleGetStarted}
               className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg"
@@ -340,6 +400,62 @@ export const Navbar = () => {
             </div>
             <ActionButton type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Creating Account..." : "Create Account"}
+            </ActionButton>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent 
+          className={cn(
+            "sm:max-w-[425px] transition-transform duration-200",
+            loginError && "animate-shake"
+          )}
+        >
+          <DialogHeader>
+            <DialogTitle>Login to Your Account</DialogTitle>
+            <DialogDescription>
+              Enter your credentials to access your account.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleLogin} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={loginData.email}
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <ActionButton 
+              type="submit" 
+              className="w-full"
+              disabled={isLoggingIn}
+            >
+              {isLoggingIn ? (
+                <div className="flex items-center gap-2 justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Logging in...
+                </div>
+              ) : (
+                'Login'
+              )}
             </ActionButton>
           </form>
         </DialogContent>
