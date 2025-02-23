@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -30,20 +29,32 @@ const Pricing = () => {
     company: "",
   });
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to subscribe to a plan.",
+        });
+        navigate('/auth');
+      }
+    };
+    checkAuth();
+  }, [navigate, toast]);
+
   const handleSubscriptionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan) return;
 
     setIsLoading(selectedPlan);
     try {
-      // Get the current authenticated user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
         throw new Error('You must be logged in to subscribe');
       }
 
-      // First, save subscription details to Supabase
       const { data: subscriptionData, error: subscriptionError } = await supabase
         .from('subscriptions')
         .insert({
@@ -62,7 +73,6 @@ const Pricing = () => {
         throw new Error('Failed to save subscription details');
       }
 
-      // Then create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           planId: selectedPlan,
