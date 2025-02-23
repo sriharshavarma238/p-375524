@@ -39,6 +39,13 @@ export const Auth = () => {
     setIsLoading(true);
     
     try {
+      // First, check if the user exists
+      const { data: userExists } = await supabase
+        .from('auth.users')
+        .select('confirmed_at')
+        .eq('email', formData.email)
+        .single();
+
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -46,7 +53,22 @@ export const Auth = () => {
 
       if (error) {
         handleLoginError();
-        throw error;
+        
+        // Provide more specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: "The email or password you entered is incorrect. Please try again.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: error.message,
+          });
+        }
+        return;
       }
 
       toast({
