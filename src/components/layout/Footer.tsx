@@ -130,7 +130,7 @@ export const Footer = () => {
       </div>
 
       <Dialog open={!!dialogContent} onOpenChange={() => setDialogContent(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold mb-4">{dialogContent?.title}</DialogTitle>
           </DialogHeader>
