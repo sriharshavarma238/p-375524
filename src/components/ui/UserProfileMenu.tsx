@@ -33,12 +33,22 @@ interface UserProfileMenuProps {
 
 export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileMenuProps) => {
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
+  const [showCardDetails, setShowCardDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: user.user_metadata?.full_name || '',
     gender: user.user_metadata?.gender || '',
     date_of_birth: user.user_metadata?.date_of_birth || '',
   });
+
+  // Mock card data - in a real application, this would come from your payment provider
+  const mockCardData = {
+    cardNumber: "4111 **** **** ****",
+    cardHolder: user.user_metadata?.full_name || '',
+    expiryDate: "12/25",
+    cardType: "Visa"
+  };
+
   const joinedDate = user.created_at ? formatDistance(new Date(user.created_at), new Date(), { addSuffix: true }) : '';
 
   const handleSave = async () => {
@@ -98,7 +108,10 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               </DropdownMenuItem>
               
               {/* Card Details Section */}
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 p-2 mb-1">
+              <DropdownMenuItem 
+                onClick={() => setShowCardDetails(true)}
+                className="cursor-pointer flex items-center gap-2 p-2 mb-1"
+              >
                 <CreditCard className="h-4 w-4" />
                 <div className="flex flex-col">
                   <span className="font-medium">Card Details</span>
@@ -121,6 +134,7 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Personal Information Dialog */}
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -197,6 +211,41 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               <Button onClick={handleSave}>Save Changes</Button>
             </DialogFooter>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Card Details Dialog */}
+      <Dialog open={showCardDetails} onOpenChange={setShowCardDetails}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              <span>Card Details</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="p-6 border rounded-lg space-y-4 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <Label>Card Type</Label>
+                <span className="font-medium">{mockCardData.cardType}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <Label>Card Number</Label>
+                <span className="font-mono">{mockCardData.cardNumber}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <Label>Card Holder</Label>
+                <span>{mockCardData.cardHolder}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <Label>Expiry Date</Label>
+                <span>{mockCardData.expiryDate}</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              For security reasons, your full card number and CVV are not displayed.
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
     </>
