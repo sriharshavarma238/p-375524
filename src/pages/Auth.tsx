@@ -39,20 +39,24 @@ export const Auth = () => {
     setIsLoading(true);
     
     try {
+      console.log('Attempting login with:', formData.email); // Debug log
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+        email: formData.email.trim(), // Trim whitespace
         password: formData.password,
       });
 
+      console.log('Login response:', { data, error }); // Debug log
+
       if (error) {
         handleLoginError();
+        console.error('Login error:', error); // Debug log
         
-        // Provide specific error messages based on the error type
         if (error.message.includes('Invalid login credentials')) {
           toast({
             variant: "destructive",
             title: "Login failed",
-            description: "The email or password you entered is incorrect. Please try again.",
+            description: "Please make sure your email and password are correct. If you just signed up, try logging in with the exact same email you used.",
           });
         } else if (error.message.includes('Email not confirmed')) {
           toast({
@@ -70,14 +74,23 @@ export const Auth = () => {
         return;
       }
 
-      if (data.session) {
+      if (data?.session) {
+        console.log('Login successful, session created'); // Debug log
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
         navigate('/');
+      } else {
+        console.log('No session created after successful login'); // Debug log
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Unable to create session. Please try again.",
+        });
       }
     } catch (error: any) {
+      console.error('Unexpected error during login:', error); // Debug log
       handleLoginError();
       toast({
         variant: "destructive",
@@ -94,8 +107,10 @@ export const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
+      console.log('Attempting signup with:', formData.email); // Debug log
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email.trim(), // Trim whitespace
         password: formData.password,
         options: {
           data: {
@@ -105,16 +120,27 @@ export const Auth = () => {
         },
       });
 
+      console.log('Signup response:', { data, error }); // Debug log
+
       if (error) {
         handleLoginError();
         throw error;
       }
 
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
-      });
+      // Check if the signup was successful
+      if (data?.user) {
+        toast({
+          title: "Account created successfully!",
+          description: "You can now log in with your email and password.",
+        });
+        // Switch to login tab after successful signup
+        const loginTrigger = document.querySelector('[value="login"]') as HTMLButtonElement;
+        if (loginTrigger) {
+          loginTrigger.click();
+        }
+      }
     } catch (error: any) {
+      console.error('Signup error:', error); // Debug log
       toast({
         variant: "destructive",
         title: "Signup failed",
