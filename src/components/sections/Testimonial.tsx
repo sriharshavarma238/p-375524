@@ -22,7 +22,7 @@ export const Testimonial = () => {
                 playsInline
               >
                 <source 
-                  src="https://cdn.coverr.co/videos/coverr-typing-on-computer-keyboard-2022_4Qz1wylL5/1080p.mp4" 
+                  src="https://res.cloudinary.com/dmurwxefk/video/upload/v1740257059/hackathon_video_i41zng.mp4" 
                   type="video/mp4" 
                 />
                 Your browser does not support the video tag.
