@@ -1,5 +1,11 @@
-
-import React from "react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const FeatureCard = ({ icon, title, description }) => (
   <div className="flex flex-col">
@@ -14,7 +20,7 @@ const FeatureCard = ({ icon, title, description }) => (
   </div>
 );
 
-const InsightStep = ({ image, title, description, actionText }) => (
+const InsightStep = ({ image, title, description, actionText, onActionClick }) => (
   <div className="flex-1">
     <img
       src={image}
@@ -23,7 +29,10 @@ const InsightStep = ({ image, title, description, actionText }) => (
     />
     <h3 className="text-xl font-bold mb-3">{title}</h3>
     <p className="text-base text-gray-600 mb-4">{description}</p>
-    <button className="flex items-center text-black font-semibold hover:opacity-80">
+    <button 
+      onClick={onActionClick}
+      className="flex items-center text-black font-semibold hover:opacity-80"
+    >
       {actionText}
       <svg
         className="w-4 h-4 ml-2"
@@ -41,6 +50,44 @@ const InsightStep = ({ image, title, description, actionText }) => (
 );
 
 export const Features = () => {
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
+
+  const stepDetails = {
+    scan: {
+      title: "AI Scanning for Comprehensive Data Analysis",
+      description: `Our advanced AI scanning technology performs deep analysis of vast datasets to uncover meaningful patterns and insights. Here's what makes it special:
+
+      • Real-time Processing: Analyze millions of data points in seconds
+      • Pattern Recognition: Identify hidden trends and correlations
+      • Automated Reporting: Generate comprehensive insights reports
+      • Custom Filters: Focus on the data that matters most to your business
+      
+      The system continuously learns and adapts to new data patterns, ensuring that your insights remain current and relevant in an ever-changing business landscape.`,
+    },
+    predict: {
+      title: "Predictive Modeling for Strategic Decision Making",
+      description: `Our predictive modeling capabilities transform historical data into actionable future insights:
+
+      • Advanced Algorithms: Utilize state-of-the-art machine learning models
+      • Risk Assessment: Identify potential challenges before they arise
+      • Market Forecasting: Predict industry trends and market movements
+      • Scenario Planning: Test different strategies in a simulated environment
+      
+      By combining multiple data sources and advanced analytics, we help you make informed decisions with confidence.`,
+    },
+    implement: {
+      title: "Implementation and Optimization",
+      description: `Turn insights into action with our proven implementation framework:
+
+      • Step-by-step Guidance: Clear implementation roadmaps
+      • Performance Monitoring: Real-time tracking of key metrics
+      • Continuous Optimization: Regular updates and improvements
+      • Expert Support: Access to our team of implementation specialists
+      
+      We ensure that the transition from insight to action is smooth and effective, maximizing the value of your data-driven decisions.`,
+    },
+  };
+
   return (
     <section className="bg-white w-full py-28 px-4 md:px-16">
       <div className="max-w-[1440px] mx-auto">
@@ -80,7 +127,6 @@ export const Features = () => {
           </div>
         </div>
 
-        {/* New Insights Section */}
         <div className="mt-32">
           <h2 className="text-[32px] font-bold mb-12">
             Transforming Data into Actionable Insights with Quantum AI
@@ -101,21 +147,57 @@ export const Features = () => {
               title="Step 1: AI Scanning for Comprehensive Data Analysis"
               description="Our AI scans vast datasets to identify trends and opportunities."
               actionText="Learn"
+              onActionClick={() => setOpenDialog('scan')}
             />
             <InsightStep
               image="/lovable-uploads/0b4fb985-4c15-4890-bc61-19fe508dbd58.png"
               title="Step 2: Predictive Modeling for Strategic Decision Making"
               description="Utilize predictive models to forecast market movements and risks."
               actionText="Discover"
+              onActionClick={() => setOpenDialog('predict')}
             />
             <InsightStep
               image="/lovable-uploads/b98d46c6-f611-4f71-ab1a-d9e129a520dc.png"
               title="Step 3: Implementation and Optimization"
               description="Put insights into action with our proven implementation framework."
               actionText="Analyze"
+              onActionClick={() => setOpenDialog('implement')}
             />
           </div>
         </div>
+
+        <Dialog open={openDialog === 'scan'} onOpenChange={() => setOpenDialog(null)}>
+          <DialogContent className="max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl mb-4">{stepDetails.scan.title}</DialogTitle>
+              <DialogDescription className="text-base whitespace-pre-line">
+                {stepDetails.scan.description}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openDialog === 'predict'} onOpenChange={() => setOpenDialog(null)}>
+          <DialogContent className="max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl mb-4">{stepDetails.predict.title}</DialogTitle>
+              <DialogDescription className="text-base whitespace-pre-line">
+                {stepDetails.predict.description}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openDialog === 'implement'} onOpenChange={() => setOpenDialog(null)}>
+          <DialogContent className="max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl mb-4">{stepDetails.implement.title}</DialogTitle>
+              <DialogDescription className="text-base whitespace-pre-line">
+                {stepDetails.implement.description}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
