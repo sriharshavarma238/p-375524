@@ -39,14 +39,7 @@ export const Auth = () => {
     setIsLoading(true);
     
     try {
-      // First, check if the user exists
-      const { data: userExists } = await supabase
-        .from('auth.users')
-        .select('confirmed_at')
-        .eq('email', formData.email)
-        .single();
-
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
@@ -54,12 +47,18 @@ export const Auth = () => {
       if (error) {
         handleLoginError();
         
-        // Provide more specific error messages
+        // Provide specific error messages based on the error type
         if (error.message.includes('Invalid login credentials')) {
           toast({
             variant: "destructive",
             title: "Login failed",
             description: "The email or password you entered is incorrect. Please try again.",
+          });
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            variant: "destructive",
+            title: "Email not verified",
+            description: "Please check your email and click the verification link to complete signup.",
           });
         } else {
           toast({
@@ -71,17 +70,19 @@ export const Auth = () => {
         return;
       }
 
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-      
-      navigate('/');
+      if (data.session) {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+        navigate('/');
+      }
     } catch (error: any) {
+      handleLoginError();
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsLoading(false);
