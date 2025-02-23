@@ -24,7 +24,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
           ? "bg-black text-white border-black hover:bg-gray-800"
           : variant === "cyan"
           ? cn(
-              "bg-transparent hover:bg-gray-100 hover:text-black",
+              "bg-transparent hover:bg-transparent",
               isDarkBg 
                 ? "text-[#FEF7CD] border-cyan-500" 
                 : "text-cyan-500 border-yellow-500"
