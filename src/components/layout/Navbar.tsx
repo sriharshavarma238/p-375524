@@ -7,10 +7,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
@@ -20,7 +29,9 @@ export const Navbar = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginError, setLoginError] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     name: "",
@@ -31,9 +42,22 @@ export const Navbar = () => {
     email: "",
     password: ""
   });
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
@@ -53,9 +77,28 @@ export const Navbar = () => {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const handleGetStarted = () => {
     setIsSignUpOpen(true);
   };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+      });
+    }
+  };
+
   const handleNavigation = (sectionId: string) => {
     if (location.pathname !== '/') {
       window.location.href = `/?section=${sectionId}`;
@@ -64,6 +107,7 @@ export const Navbar = () => {
       setIsMenuOpen(false);
     }
   };
+
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password.length < 8) {
@@ -116,6 +160,7 @@ export const Navbar = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       name,
@@ -126,6 +171,7 @@ export const Navbar = () => {
       [name]: value
     }));
   };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -162,7 +208,9 @@ export const Navbar = () => {
       setIsLoggingIn(false);
     }
   };
+
   const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
+
   return <>
       <nav className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-colors duration-300 bg-transparent">
         <div className="flex items-center gap-8 w-full justify-between md:justify-start">
@@ -202,10 +250,30 @@ export const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4 ml-auto">
-            <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">Log in</ActionButton>
-            <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
-              Get Started
-            </ActionButton>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                  <UserCircle className={`w-6 h-6 ${textColorClass}`} />
+                  <span className={textColorClass}>{user.email}</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">
+                  Log in
+                </ActionButton>
+                <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
+                  Get Started
+                </ActionButton>
+              </>
+            )}
           </div>
 
           <Sheet>
@@ -233,9 +301,23 @@ export const Navbar = () => {
                 <Link to="/pricing" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
                   Pricing
                 </Link>
-                <ActionButton onClick={handleGetStarted} className="w-full mt-4 transform hover:scale-105 transition-all duration-200">
-                  Get Started
-                </ActionButton>
+                {user ? (
+                  <>
+                    <div className="text-lg py-2 text-gray-600">
+                      {user.email}
+                    </div>
+                    <button 
+                      onClick={handleLogout}
+                      className="text-lg text-left py-2 text-red-600 hover:text-red-700 transition-colors duration-200"
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <ActionButton onClick={handleGetStarted} className="w-full mt-4 transform hover:scale-105 transition-all duration-200">
+                    Get Started
+                  </ActionButton>
+                )}
               </div>
             </SheetContent>
           </Sheet>
