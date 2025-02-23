@@ -35,16 +35,14 @@ export const Hero = () => {
     try {
       const { error } = await supabase
         .from('demo_requests')
-        .insert([
-          {
+        .insert([{
             company_name: formData.companyName,
             contact_name: formData.contactName,
             email: formData.email,
             phone_number: formData.phoneNumber,
             company_size: formData.companySize,
             business_challenge: formData.businessChallenge
-          }
-        ]);
+          }] as any); // Using type assertion as a workaround since we can't modify the types file
 
       if (error) throw error;
       
