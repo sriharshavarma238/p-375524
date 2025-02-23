@@ -107,20 +107,12 @@ export const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className={`max-w-md w-full space-y-8 ${shake ? 'animate-[shake_0.5s_ease-in-out]'}`}>
+      <div className={`max-w-md w-full space-y-8 ${shake ? 'animate-shake' : ''}`}>
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Welcome
           </h2>
         </div>
-
-        <style jsx>{`
-          @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-          }
-        `}</style>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
