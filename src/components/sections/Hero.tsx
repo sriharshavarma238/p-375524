@@ -1,7 +1,55 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 export const Hero = () => {
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phoneNumber: "",
+    companySize: "",
+    businessChallenge: ""
+  });
+  const { toast } = useToast();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDemoRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send this data to your backend
+    console.log("Demo requested:", formData);
+    
+    // Show success message
+    toast({
+      title: "Demo Request Received",
+      description: "We'll get back to you within 24 hours to schedule your demo.",
+      duration: 5000,
+    });
+    
+    // Close modal and reset form
+    setIsDemoModalOpen(false);
+    setFormData({
+      companyName: "",
+      contactName: "",
+      email: "",
+      phoneNumber: "",
+      companySize: "",
+      businessChallenge: ""
+    });
+  };
+
   return (
     <section className="relative min-h-[900px] w-full flex items-center justify-center overflow-hidden">
       <img
@@ -32,11 +80,112 @@ export const Hero = () => {
           <ActionButton
             variant="secondary"
             className="text-white border-white hover:bg-white/10"
+            onClick={() => setIsDemoModalOpen(true)}
           >
             Request a Demo
           </ActionButton>
         </div>
       </div>
+
+      <Dialog open={isDemoModalOpen} onOpenChange={setIsDemoModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold mb-4">Request a Demo</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleDemoRequest} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company Name*</Label>
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  required
+                  placeholder="Enter your company name"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactName">Contact Name*</Label>
+                <Input
+                  id="contactName"
+                  name="contactName"
+                  required
+                  placeholder="Enter your full name"
+                  value={formData.contactName}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Business Email*</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="your@company.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number*</Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  required
+                  placeholder="Enter your phone number"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="companySize">Company Size*</Label>
+              <Input
+                id="companySize"
+                name="companySize"
+                required
+                placeholder="Number of employees"
+                value={formData.companySize}
+                onChange={handleInputChange}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="businessChallenge">What's your biggest business challenge right now?*</Label>
+              <textarea
+                id="businessChallenge"
+                name="businessChallenge"
+                required
+                className="w-full min-h-[100px] p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Tell us about the challenges you're facing..."
+                value={formData.businessChallenge}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="flex justify-end gap-4 pt-4">
+              <ActionButton
+                type="button"
+                variant="secondary"
+                onClick={() => setIsDemoModalOpen(false)}
+                className="bg-gray-100 hover:bg-gray-200"
+              >
+                Cancel
+              </ActionButton>
+              <ActionButton
+                type="submit"
+                variant="primary"
+                className="bg-black text-white hover:bg-gray-800"
+              >
+                Submit Request
+              </ActionButton>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
