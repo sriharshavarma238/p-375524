@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -258,6 +257,7 @@ export const Navbar = () => {
             <ActionButton 
               onClick={() => setShowLoginModal(true)}
               variant="cyan"
+              isDarkBg={isOverHeroSection}
               className="transform hover:scale-105 transition-all duration-200"
             >
               Login

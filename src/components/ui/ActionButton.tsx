@@ -6,12 +6,14 @@ interface ActionButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "cyan";
   children: React.ReactNode;
+  isDarkBg?: boolean;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
   variant = "primary",
   children,
   className,
+  isDarkBg = false,
   ...props
 }) => {
   return (
@@ -21,7 +23,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         variant === "primary"
           ? "bg-black text-white border-black hover:bg-gray-800"
           : variant === "cyan"
-          ? "bg-transparent text-[#FEF7CD] border-cyan-500 hover:bg-gray-100 hover:text-black"
+          ? cn(
+              "bg-transparent border-cyan-500 hover:bg-gray-100 hover:text-black",
+              isDarkBg ? "text-cyan-500" : "text-[#FEF7CD]"
+            )
           : "bg-transparent text-black border-black hover:bg-gray-100",
         className,
       )}
@@ -31,3 +36,4 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     </button>
   );
 };
+
