@@ -6,6 +6,7 @@ import { Features } from "@/components/sections/Features";
 import { Testimonial } from "@/components/sections/Testimonial";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { Footer } from "@/components/layout/Footer";
+import { ChatSupport } from "@/components/chat/ChatSupport";
 
 const Index = () => {
   return (
@@ -74,6 +75,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <ChatSupport />
     </div>
   );
 };
