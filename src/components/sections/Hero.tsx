@@ -1,9 +1,11 @@
+
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Hero = () => {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
@@ -15,6 +17,7 @@ export const Hero = () => {
     companySize: "",
     businessChallenge: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -25,28 +28,54 @@ export const Hero = () => {
     }));
   };
 
-  const handleDemoRequest = (e: React.FormEvent) => {
+  const handleDemoRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send this data to your backend
-    console.log("Demo requested:", formData);
-    
-    // Show success message
-    toast({
-      title: "Demo Request Received",
-      description: "We'll get back to you within 24 hours to schedule your demo.",
-      duration: 5000,
-    });
-    
-    // Close modal and reset form
-    setIsDemoModalOpen(false);
-    setFormData({
-      companyName: "",
-      contactName: "",
-      email: "",
-      phoneNumber: "",
-      companySize: "",
-      businessChallenge: ""
-    });
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('demo_requests')
+        .insert([
+          {
+            company_name: formData.companyName,
+            contact_name: formData.contactName,
+            email: formData.email,
+            phone_number: formData.phoneNumber,
+            company_size: formData.companySize,
+            business_challenge: formData.businessChallenge
+          }
+        ]);
+
+      if (error) throw error;
+      
+      // Show success message
+      toast({
+        title: "Demo Request Received",
+        description: "We'll get back to you within 24 hours to schedule your demo.",
+        duration: 5000,
+      });
+      
+      // Close modal and reset form
+      setIsDemoModalOpen(false);
+      setFormData({
+        companyName: "",
+        contactName: "",
+        email: "",
+        phoneNumber: "",
+        companySize: "",
+        businessChallenge: ""
+      });
+    } catch (error) {
+      console.error("Error submitting demo request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit demo request. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -74,6 +103,7 @@ export const Hero = () => {
             variant="secondary"
             className="text-white border-white hover:bg-white/10"
             onClick={() => setIsDemoModalOpen(true)}
+            disabled={isSubmitting}
           >
             Request a Demo
           </ActionButton>
@@ -96,6 +126,7 @@ export const Hero = () => {
                   placeholder="Enter your company name"
                   value={formData.companyName}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -107,6 +138,7 @@ export const Hero = () => {
                   placeholder="Enter your full name"
                   value={formData.contactName}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -119,6 +151,7 @@ export const Hero = () => {
                   placeholder="your@company.com"
                   value={formData.email}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -130,6 +163,7 @@ export const Hero = () => {
                   placeholder="Enter your phone number"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -143,6 +177,7 @@ export const Hero = () => {
                 placeholder="Number of employees"
                 value={formData.companySize}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
               />
             </div>
             
@@ -156,6 +191,7 @@ export const Hero = () => {
                 placeholder="Tell us about the challenges you're facing..."
                 value={formData.businessChallenge}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -165,6 +201,7 @@ export const Hero = () => {
                 variant="secondary"
                 onClick={() => setIsDemoModalOpen(false)}
                 className="bg-gray-100 hover:bg-gray-200"
+                disabled={isSubmitting}
               >
                 Cancel
               </ActionButton>
@@ -172,8 +209,9 @@ export const Hero = () => {
                 type="submit"
                 variant="primary"
                 className="bg-black text-white hover:bg-gray-800"
+                disabled={isSubmitting}
               >
-                Submit Request
+                {isSubmitting ? "Submitting..." : "Submit Request"}
               </ActionButton>
             </div>
           </form>
