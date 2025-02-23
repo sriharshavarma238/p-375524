@@ -18,6 +18,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -75,6 +82,13 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleGenderChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      gender: value
     }));
   };
   
@@ -174,14 +188,28 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
             </div>
             <div className="grid gap-2">
               <Label htmlFor="gender">Gender</Label>
-              <Input
-                id="gender"
-                name="gender"
-                value={isEditing ? formData.gender : user.user_metadata?.gender || 'Not specified'}
-                onChange={handleChange}
-                className="w-full"
-                disabled={!isEditing}
-              />
+              {isEditing ? (
+                <Select
+                  value={formData.gender}
+                  onValueChange={handleGenderChange}
+                >
+                  <SelectTrigger id="gender">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="not_specified">Rather not say</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="gender"
+                  value={user.user_metadata?.gender || 'Not specified'}
+                  className="w-full"
+                  disabled
+                />
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="dob">Date of Birth</Label>
