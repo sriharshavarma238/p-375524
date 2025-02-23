@@ -1,15 +1,87 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Calendar, Clock } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { addDays, format } from "date-fns";
 
 export const CallToAction = () => {
+  const [showTrialDialog, setShowTrialDialog] = useState(false);
+  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
+  const [consultationDate, setConsultationDate] = useState<Date>();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+  });
+  const { toast } = useToast();
+
   const benefits = [
     "Access to enterprise-grade AI models",
     "Real-time market analysis and insights",
     "Dedicated support team",
     "Customizable analytics dashboard"
   ];
+
+  const handleTrialSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast({
+        title: "Trial Activation Successful!",
+        description: "Check your email for login credentials and next steps.",
+      });
+      setShowTrialDialog(false);
+      setFormData({ name: "", email: "", company: "" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to activate trial. Please try again.",
+      });
+    }
+  };
+
+  const handleConsultationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consultationDate) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a consultation date.",
+      });
+      return;
+    }
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast({
+        title: "Consultation Scheduled!",
+        description: `Your consultation is scheduled for ${format(consultationDate, 'MMMM dd, yyyy')}. Check your email for meeting details.`,
+      });
+      setShowConsultationDialog(false);
+      setConsultationDate(undefined);
+      setFormData({ name: "", email: "", company: "" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to schedule consultation. Please try again.",
+      });
+    }
+  };
 
   return (
     <section className="bg-gradient-to-br from-blue-50 to-white w-full py-28 px-4 md:px-16">
@@ -43,11 +115,18 @@ export const CallToAction = () => {
             </ul>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <ActionButton variant="primary" className="group">
+              <ActionButton 
+                variant="primary" 
+                className="group"
+                onClick={() => setShowTrialDialog(true)}
+              >
                 Start Free Trial
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </ActionButton>
-              <ActionButton variant="secondary">
+              <ActionButton 
+                variant="secondary"
+                onClick={() => setShowConsultationDialog(true)}
+              >
                 Schedule Consultation
               </ActionButton>
             </div>
@@ -95,6 +174,112 @@ export const CallToAction = () => {
           </div>
         </div>
       </div>
+
+      {/* Trial Dialog */}
+      <Dialog open={showTrialDialog} onOpenChange={setShowTrialDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Start Your Free Trial</DialogTitle>
+            <DialogDescription>
+              Get 14 days of unlimited access to our AI-powered financial analytics platform.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleTrialSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                required
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <ActionButton type="submit" variant="primary">
+                Activate Trial
+              </ActionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Consultation Dialog */}
+      <Dialog open={showConsultationDialog} onOpenChange={setShowConsultationDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Schedule a Consultation</DialogTitle>
+            <DialogDescription>
+              Book a personalized demo with our AI experts to discuss your needs.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleConsultationSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="cons-name">Full Name</Label>
+              <Input
+                id="cons-name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cons-email">Email</Label>
+              <Input
+                id="cons-email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cons-company">Company Name</Label>
+              <Input
+                id="cons-company"
+                required
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Select Date</Label>
+              <div className="border rounded-md p-4">
+                <CalendarComponent
+                  mode="single"
+                  selected={consultationDate}
+                  onSelect={setConsultationDate}
+                  disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
+                  className="rounded-md border"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <ActionButton type="submit" variant="primary">
+                Book Consultation
+              </ActionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
