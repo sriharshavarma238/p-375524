@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -70,13 +69,7 @@ export const Hero = () => {
           data-backed strategies designed for rapid expansion.
         </p>
 
-        <div className="flex gap-4 justify-center mt-8">
-          <ActionButton
-            variant="secondary"
-            className="bg-white text-black border-white hover:bg-gray-100"
-          >
-            Get Started
-          </ActionButton>
+        <div className="flex justify-center mt-8">
           <ActionButton
             variant="secondary"
             className="text-white border-white hover:bg-white/10"
