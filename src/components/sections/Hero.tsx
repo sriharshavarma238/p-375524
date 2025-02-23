@@ -96,12 +96,12 @@ export const Hero = () => {
       <div className="absolute inset-0 w-full h-full">
         <img
           loading="lazy"
-          srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/e18e13be738cbf10cd48d58b583f5a53f4c7a781a550c2587c827bcff17f5cf0?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/e18e13be738cbf10cd48d58b583f5a53f4c7a781a550c2587c827bcff17f5cf0?placeholderIfAbsent=true&width=2000 2000w"
+          src="/lovable-uploads/624f1b55-9dc7-4ac0-9031-726c2204db25.png"
           className="w-full h-full object-cover [image-rendering:pixelated] scale-[1.01]"
           style={{
             imageRendering: 'pixelated'
           }}
-          alt="Hero background"
+          alt="City skyline view from a high-rise office"
         />
         <div 
           className="absolute inset-0 bg-black/40"
