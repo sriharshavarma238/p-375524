@@ -1,17 +1,14 @@
-
 import React from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { scrollToSection } from "@/utils/scrollUtils";
-
 export const Footer = () => {
   const navigate = useNavigate();
   const [dialogContent, setDialogContent] = React.useState<{
     title: string;
     content: string;
   } | null>(null);
-
   const handleNavigation = (section: string) => {
     switch (section) {
       case "blog":
@@ -58,42 +55,25 @@ export const Footer = () => {
         break;
     }
   };
-
-  return (
-    <footer className="bg-white w-full px-4 md:px-16 py-20">
+  return <footer className="bg-white w-full px-4 md:px-16 py-20">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col items-center max-w-[493px] mx-auto">
           <Logo />
 
           <div className="flex flex-wrap justify-center gap-8 mt-8 text-sm font-semibold text-black">
-            <button 
-              onClick={() => handleNavigation("about")}
-              className="hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => handleNavigation("about")} className="hover:text-gray-600 transition-colors">
               About Us
             </button>
-            <button 
-              onClick={() => handleNavigation("services")}
-              className="hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => handleNavigation("services")} className="hover:text-gray-600 transition-colors">
               Our Services
             </button>
-            <button 
-              onClick={() => handleNavigation("contact")}
-              className="hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => handleNavigation("contact")} className="hover:text-gray-600 transition-colors">
               Contact Us
             </button>
-            <button 
-              onClick={() => handleNavigation("blog")}
-              className="hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => handleNavigation("blog")} className="hover:text-gray-600 transition-colors">
               Blog Insights
             </button>
-            <button 
-              onClick={() => handleNavigation("get-started")}
-              className="hover:text-gray-600 transition-colors"
-            >
+            <button onClick={() => handleNavigation("get-started")} className="hover:text-gray-600 transition-colors">
               Get Started
             </button>
           </div>
@@ -102,26 +82,15 @@ export const Footer = () => {
         <div className="mt-20">
           <div className="border-t border-black"></div>
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-sm">
-            <div className="text-black">
-              © 2024 Relume. All rights reserved.
-            </div>
+            <div className="text-black">© 2025 Quantum AI. All rights reserved.</div>
             <div className="flex gap-6 text-black mt-4 md:mt-0">
-              <button
-                onClick={() => handleNavigation("privacy")}
-                className="underline hover:text-gray-600 transition-colors"
-              >
+              <button onClick={() => handleNavigation("privacy")} className="underline hover:text-gray-600 transition-colors">
                 Privacy Policy
               </button>
-              <button
-                onClick={() => handleNavigation("terms")}
-                className="underline hover:text-gray-600 transition-colors"
-              >
+              <button onClick={() => handleNavigation("terms")} className="underline hover:text-gray-600 transition-colors">
                 Terms of Service
               </button>
-              <button
-                onClick={() => handleNavigation("cookies")}
-                className="underline hover:text-gray-600 transition-colors"
-              >
+              <button onClick={() => handleNavigation("cookies")} className="underline hover:text-gray-600 transition-colors">
                 Cookie Settings
               </button>
             </div>
@@ -139,6 +108,5 @@ export const Footer = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </footer>
-  );
+    </footer>;
 };
