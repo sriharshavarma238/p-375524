@@ -34,7 +34,7 @@ export const Auth = () => {
 
   const handleLoginError = () => {
     setShake(true);
-    setTimeout(() => setShake(false), 500); // Reset shake after animation
+    setTimeout(() => setShake(false), 500);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
