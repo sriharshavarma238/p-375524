@@ -38,6 +38,24 @@ export const Footer = () => {
           content: "Get in touch with our team:\n\n• Email: enterprise@company.com\n• Phone: +1 (555) 123-4567\n• Hours: Monday - Friday, 9:00 AM - 6:00 PM EST\n\nFor immediate assistance, you can also use our chat support or schedule a consultation through the pricing page."
         });
         break;
+      case "privacy":
+        setDialogContent({
+          title: "Privacy Policy",
+          content: "Last Updated: March 2024\n\nYour privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information:\n\n• Data Collection: We collect information you provide directly to us and data about your usage of our services\n\n• Data Usage: Your information helps us provide and improve our services, communicate with you, and enhance security\n\n• Data Protection: We implement industry-standard security measures to protect your personal information\n\n• Your Rights: You have the right to access, correct, or delete your personal information\n\n• Cookies: We use cookies to improve your experience and analyze website traffic\n\nFor detailed information about our privacy practices, please contact our Data Protection Officer."
+        });
+        break;
+      case "terms":
+        setDialogContent({
+          title: "Terms of Service",
+          content: "Last Updated: March 2024\n\nBy using our services, you agree to these terms:\n\n1. Account Responsibilities\n• Maintain accurate account information\n• Protect your account credentials\n• Notify us of any unauthorized access\n\n2. Acceptable Use\n• Follow all applicable laws and regulations\n• Respect intellectual property rights\n• Don't misuse our services\n\n3. Service Availability\n• We strive for 99.9% uptime\n• Scheduled maintenance will be announced\n• No guarantee of uninterrupted service\n\n4. Termination\n• We may suspend or terminate accounts\n• You can cancel your account anytime\n\n5. Liability\n• Services provided 'as-is'\n• Limited liability for damages\n\nContact legal@company.com for questions."
+        });
+        break;
+      case "cookies":
+        setDialogContent({
+          title: "Cookie Settings",
+          content: "Cookie Preferences\n\nWe use cookies to enhance your experience:\n\n1. Essential Cookies (Required)\n• Authentication\n• Security\n• Basic functionality\n\n2. Analytics Cookies (Optional)\n• Usage patterns\n• Performance monitoring\n• Error tracking\n\n3. Marketing Cookies (Optional)\n• Personalized content\n• Advertisement targeting\n\n4. Preference Cookies (Optional)\n• Remember settings\n• Language preferences\n\nYou can manage cookie preferences in your browser settings at any time. Essential cookies cannot be disabled as they are required for basic site functionality."
+        });
+        break;
     }
   };
 
@@ -88,24 +106,24 @@ export const Footer = () => {
               © 2024 Relume. All rights reserved.
             </div>
             <div className="flex gap-6 text-black mt-4 md:mt-0">
-              <a
-                href="#"
+              <button
+                onClick={() => handleNavigation("privacy")}
                 className="underline hover:text-gray-600 transition-colors"
               >
                 Privacy Policy
-              </a>
-              <a
-                href="#"
+              </button>
+              <button
+                onClick={() => handleNavigation("terms")}
                 className="underline hover:text-gray-600 transition-colors"
               >
                 Terms of Service
-              </a>
-              <a
-                href="#"
+              </button>
+              <button
+                onClick={() => handleNavigation("cookies")}
                 className="underline hover:text-gray-600 transition-colors"
               >
                 Cookie Settings
-              </a>
+              </button>
             </div>
           </div>
         </div>
