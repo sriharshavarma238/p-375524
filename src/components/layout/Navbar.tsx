@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -256,7 +257,7 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-4 ml-auto">
             <ActionButton 
               onClick={() => setShowLoginModal(true)}
-              variant="secondary"
+              variant="cyan"
               className="transform hover:scale-105 transition-all duration-200"
             >
               Login
