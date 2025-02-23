@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { ArrowRight, Check, Calendar, Clock, Loader2, ArrowLeft } from "lucide-react";
+import { ArrowRight, Check, Calendar, Clock, Loader2, ArrowLeft, CreditCard } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,23 +23,24 @@ export const CallToAction = () => {
   const [isSubmittingConsultation, setIsSubmittingConsultation] = useState(false);
   const [isHoveringTrial, setIsHoveringTrial] = useState(false);
   const [isHoveringConsultation, setIsHoveringConsultation] = useState(false);
+  const [trialStep, setTrialStep] = useState<'details' | 'payment'>('details');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
   });
-  const [consultationStep, setConsultationStep] = useState<'details' | 'calendar'>('details');
   const { toast } = useToast();
-
-  const benefits = [
-    "Access to enterprise-grade AI models",
-    "Real-time market analysis and insights",
-    "Dedicated support team",
-    "Customizable analytics dashboard"
-  ];
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (trialStep === 'details') {
+      setTrialStep('payment');
+      return;
+    }
+
     setIsSubmittingTrial(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -48,7 +49,15 @@ export const CallToAction = () => {
         description: "Welcome aboard! Check your email for login credentials and next steps.",
       });
       setShowTrialDialog(false);
-      setFormData({ name: "", email: "", company: "" });
+      setTrialStep('details');
+      setFormData({
+        name: "",
+        email: "",
+        company: "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -59,6 +68,26 @@ export const CallToAction = () => {
       setIsSubmittingTrial(false);
     }
   };
+
+  const handleCloseTrialDialog = () => {
+    setShowTrialDialog(false);
+    setTrialStep('details');
+    setFormData({
+      name: "",
+      email: "",
+      company: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+    });
+  };
+
+  const benefits = [
+    "Access to enterprise-grade AI models",
+    "Real-time market analysis and insights",
+    "Dedicated support team",
+    "Customizable analytics dashboard"
+  ];
 
   const handleConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +114,7 @@ export const CallToAction = () => {
       setShowConsultationDialog(false);
       setConsultationStep('details');
       setConsultationDate(undefined);
-      setFormData({ name: "", email: "", company: "" });
+      setFormData({ name: "", email: "", company: "", cardNumber: "", expiryDate: "", cvv: "" });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -221,43 +250,105 @@ export const CallToAction = () => {
       </div>
 
       {/* Trial Dialog */}
-      <Dialog open={showTrialDialog} onOpenChange={setShowTrialDialog}>
+      <Dialog open={showTrialDialog} onOpenChange={handleCloseTrialDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Start Your Free Trial</DialogTitle>
-            <DialogDescription>
-              Get 14 days of unlimited access to our AI-powered financial analytics platform.
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              {trialStep === 'payment' && (
+                <button
+                  onClick={() => setTrialStep('details')}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div>
+                <DialogTitle>Start Your Free Trial</DialogTitle>
+                <DialogDescription>
+                  {trialStep === 'details' 
+                    ? "Get 14 days of unlimited access to our AI-powered financial analytics platform."
+                    : "Add your payment details for when the trial ends."}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
           <form onSubmit={handleTrialSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company Name</Label>
-              <Input
-                id="company"
-                required
-                value={formData.company}
-                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              />
-            </div>
+            {trialStep === 'details' ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company Name</Label>
+                  <Input
+                    id="company"
+                    required
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="cardNumber">Card Number</Label>
+                  <div className="relative">
+                    <Input
+                      id="cardNumber"
+                      required
+                      placeholder="1234 5678 9012 3456"
+                      value={formData.cardNumber}
+                      onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
+                      className="pl-10"
+                    />
+                    <CreditCard className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="expiryDate">Expiry Date</Label>
+                    <Input
+                      id="expiryDate"
+                      required
+                      placeholder="MM/YY"
+                      value={formData.expiryDate}
+                      onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cvv">CVV</Label>
+                    <Input
+                      id="cvv"
+                      required
+                      type="password"
+                      maxLength={4}
+                      placeholder="123"
+                      value={formData.cvv}
+                      onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  Your card won't be charged during the trial. After 14 days, your subscription will begin automatically.
+                </p>
+              </>
+            )}
             <DialogFooter>
               <ActionButton 
                 type="submit" 
@@ -271,7 +362,7 @@ export const CallToAction = () => {
                     Activating...
                   </div>
                 ) : (
-                  <span>Activate Trial</span>
+                  <span>{trialStep === 'details' ? 'Next' : 'Start Trial'}</span>
                 )}
               </ActionButton>
             </DialogFooter>
