@@ -26,8 +26,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { companyName, contactName, email, companySize }: DemoRequest = await req.json();
 
+    console.log("Attempting to send email to:", email);
+
     const emailResponse = await resend.emails.send({
-      from: "Demo Request <onboarding@resend.dev>",
+      from: "thimmishettyvijay@gmail.com", // Using the verified email address
       to: [email],
       subject: "Your Demo Request Confirmation",
       html: `
@@ -59,7 +61,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error("Error sending demo confirmation email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.response?.data || "No additional details" 
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
