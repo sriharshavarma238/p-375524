@@ -33,7 +33,8 @@ export const Hero = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Store the demo request in Supabase
+      const { error: dbError } = await supabase
         .from('demo_requests')
         .insert([{
             company_name: formData.companyName,
@@ -42,14 +43,28 @@ export const Hero = () => {
             phone_number: formData.phoneNumber,
             company_size: formData.companySize,
             business_challenge: formData.businessChallenge
-          }] as any); // Using type assertion as a workaround since we can't modify the types file
+          }] as any);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+
+      // Send confirmation email
+      const { error: emailError } = await supabase.functions.invoke('send-demo-confirmation', {
+        body: {
+          companyName: formData.companyName,
+          contactName: formData.contactName,
+          email: formData.email,
+          companySize: formData.companySize,
+        },
+      });
+
+      if (emailError) {
+        console.error("Error sending confirmation email:", emailError);
+      }
       
       // Show success message
       toast({
         title: "Demo Request Received",
-        description: "We'll get back to you within 24 hours to schedule your demo.",
+        description: "We'll get back to you within 24 hours to schedule your demo. Please check your email for confirmation.",
         duration: 5000,
       });
       
