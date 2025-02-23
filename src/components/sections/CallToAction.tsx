@@ -24,6 +24,7 @@ export const CallToAction = () => {
   const [isHoveringTrial, setIsHoveringTrial] = useState(false);
   const [isHoveringConsultation, setIsHoveringConsultation] = useState(false);
   const [trialStep, setTrialStep] = useState<'details' | 'payment'>('details');
+  const [consultationStep, setConsultationStep] = useState<'details' | 'calendar'>('details');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -82,13 +83,6 @@ export const CallToAction = () => {
     });
   };
 
-  const benefits = [
-    "Access to enterprise-grade AI models",
-    "Real-time market analysis and insights",
-    "Dedicated support team",
-    "Customizable analytics dashboard"
-  ];
-
   const handleConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (consultationStep === 'details') {
@@ -114,7 +108,14 @@ export const CallToAction = () => {
       setShowConsultationDialog(false);
       setConsultationStep('details');
       setConsultationDate(undefined);
-      setFormData({ name: "", email: "", company: "", cardNumber: "", expiryDate: "", cvv: "" });
+      setFormData({
+        name: "",
+        email: "",
+        company: "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -130,7 +131,22 @@ export const CallToAction = () => {
     setShowConsultationDialog(false);
     setConsultationStep('details');
     setConsultationDate(undefined);
+    setFormData({
+      name: "",
+      email: "",
+      company: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+    });
   };
+
+  const benefits = [
+    "Access to enterprise-grade AI models",
+    "Real-time market analysis and insights",
+    "Dedicated support team",
+    "Customizable analytics dashboard"
+  ];
 
   return (
     <section className="bg-gradient-to-br from-blue-50 to-white w-full py-28 px-4 md:px-16">
