@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   DropdownMenu,
@@ -51,7 +50,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
     date_of_birth: user.user_metadata?.date_of_birth || '',
   });
 
-  // Mock card data - in a real application, this would come from your payment provider
   const mockCardData = {
     cardNumber: "4111 **** **** ****",
     cardHolder: user.user_metadata?.full_name || '',
@@ -60,6 +58,12 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
   };
 
   const joinedDate = user.created_at ? formatDistance(new Date(user.created_at), new Date(), { addSuffix: true }) : '';
+
+  const today = new Date();
+  const fromYear = 1900;
+  const toYear = today.getFullYear();
+
+  const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
   const handleSave = async () => {
     try {
@@ -74,7 +78,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
       if (error) throw error;
       
       setIsEditing(false);
-      // Force a page reload to update the user data
       window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -118,7 +121,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               <span>Settings</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="w-[280px] p-2">
-              {/* Personal Information Section */}
               <DropdownMenuItem 
                 onClick={() => {
                   setShowPersonalInfo(true);
@@ -133,7 +135,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
                 </div>
               </DropdownMenuItem>
               
-              {/* Card Details Section */}
               <DropdownMenuItem 
                 onClick={() => setShowCardDetails(true)}
                 className="cursor-pointer flex items-center gap-2 p-2 mb-1"
@@ -147,7 +148,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               
               <DropdownMenuSeparator className="my-2" />
               
-              {/* Logout Option */}
               <DropdownMenuItem 
                 onClick={onLogout} 
                 className="cursor-pointer flex items-center gap-2 p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -160,7 +160,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Personal Information Dialog */}
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -248,6 +247,9 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
+                      captionLayout="dropdown-buttons"
+                      fromYear={fromYear}
+                      toYear={toYear}
                     />
                   </PopoverContent>
                 </Popover>
@@ -279,7 +281,6 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
         </DialogContent>
       </Dialog>
 
-      {/* Card Details Dialog */}
       <Dialog open={showCardDetails} onOpenChange={setShowCardDetails}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
