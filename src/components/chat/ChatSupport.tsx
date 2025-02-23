@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
   id: string;
@@ -13,17 +15,27 @@ interface Message {
 }
 
 export const ChatSupport: React.FC = () => {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! How can I help you today?',
+      text: 'Hello! How can I help you today? Feel free to ask about our enterprise solutions, AI integration, or any other services.',
       isUser: false,
       timestamp: new Date(),
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,25 +52,49 @@ export const ChatSupport: React.FC = () => {
     setMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const formattedMessages = messages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.text
+      }));
+
+      formattedMessages.push({
+        role: 'user',
+        content: message
+      });
+
+      const { data, error } = await supabase.functions.invoke('chat-with-ai', {
+        body: { messages: formattedMessages }
+      });
+
+      if (error) throw error;
+
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: "Thank you for your message! Our team will get back to you soon. In the meantime, feel free to explore our services or check out our documentation.",
+        text: data.response,
         isUser: false,
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Sorry, I'm having trouble connecting. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {isOpen ? (
-        <Card className="w-[350px] h-[500px] flex flex-col">
-          <div className="p-4 bg-primary text-white flex justify-between items-center">
-            <h3 className="font-semibold">Chat Support</h3>
+        <Card className="w-[350px] h-[500px] flex flex-col shadow-xl">
+          <div className="p-4 bg-primary text-white flex justify-between items-center rounded-t-lg">
+            <h3 className="font-semibold">AI Support Assistant</h3>
             <Button
               variant="ghost"
               size="icon"
@@ -99,9 +135,10 @@ export const ChatSupport: React.FC = () => {
             {isTyping && (
               <div className="flex items-center gap-2 text-gray-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Agent is typing...
+                Assistant is typing...
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={handleSendMessage} className="p-4 border-t">
@@ -111,8 +148,9 @@ export const ChatSupport: React.FC = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type your message..."
                 className="flex-1"
+                disabled={isTyping}
               />
-              <Button type="submit" size="icon">
+              <Button type="submit" size="icon" disabled={isTyping}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
