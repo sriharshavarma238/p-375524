@@ -11,36 +11,36 @@ export type Database = {
     Tables: {
       demo_requests: {
         Row: {
-          business_challenge: string
+          business_challenge: string | null
           company_name: string
-          company_size: string
+          company_size: string | null
           contact_name: string
           created_at: string
           email: string
           id: string
-          phone_number: string
+          phone_number: string | null
           status: string
         }
         Insert: {
-          business_challenge: string
+          business_challenge?: string | null
           company_name: string
-          company_size: string
+          company_size?: string | null
           contact_name: string
           created_at?: string
           email: string
           id?: string
-          phone_number: string
+          phone_number?: string | null
           status?: string
         }
         Update: {
-          business_challenge?: string
+          business_challenge?: string | null
           company_name?: string
-          company_size?: string
+          company_size?: string | null
           contact_name?: string
           created_at?: string
           email?: string
           id?: string
-          phone_number?: string
+          phone_number?: string | null
           status?: string
         }
         Relationships: []
