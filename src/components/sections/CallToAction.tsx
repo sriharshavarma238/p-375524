@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { addDays, format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const CallToAction = () => {
   const [showTrialDialog, setShowTrialDialog] = useState(false);
@@ -33,6 +35,7 @@ export const CallToAction = () => {
     expiryDate: "",
     cvv: "",
   });
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
@@ -44,11 +47,37 @@ export const CallToAction = () => {
 
     setIsSubmittingTrial(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        localStorage.setItem('pendingTrialRegistration', JSON.stringify(formData));
+        navigate('/auth');
+        return;
+      }
+
+      const { data: trialData, error: trialError } = await supabase
+        .from('trial_registrations')
+        .insert({
+          user_id: session.user.id,
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+        })
+        .select()
+        .single();
+
+      if (trialError) {
+        if (trialError.code === '23505') {
+          throw new Error('This email is already registered for a trial.');
+        }
+        throw trialError;
+      }
+
       toast({
         title: "Trial Activation Successful! 🎉",
         description: "Welcome aboard! Check your email for login credentials and next steps.",
       });
+      
       setShowTrialDialog(false);
       setTrialStep('details');
       setFormData({
@@ -59,11 +88,12 @@ export const CallToAction = () => {
         expiryDate: "",
         cvv: "",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Trial registration error:', error);
       toast({
         variant: "destructive",
         title: "Oops! Something went wrong",
-        description: "Failed to activate trial. Please try again.",
+        description: error.message || "Failed to activate trial. Please try again.",
       });
     } finally {
       setIsSubmittingTrial(false);
