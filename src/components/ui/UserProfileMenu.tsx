@@ -22,7 +22,7 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
   
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+      <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200">
         <UserCircle className={`w-6 h-6 ${textColorClass}`} />
         <span className={textColorClass}>{user.email}</span>
       </DropdownMenuTrigger>
