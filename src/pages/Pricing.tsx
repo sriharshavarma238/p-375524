@@ -36,18 +36,24 @@ const Pricing = () => {
 
     setIsLoading(selectedPlan);
     try {
+      // Get the current authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('You must be logged in to subscribe');
+      }
+
       // First, save subscription details to Supabase
       const { data: subscriptionData, error: subscriptionError } = await supabase
         .from('subscriptions')
-        .insert([
-          {
-            plan_id: selectedPlan,
-            customer_name: formData.name,
-            email: formData.email,
-            company_name: formData.company,
-            status: 'pending'
-          }
-        ])
+        .insert({
+          user_id: user.id,
+          plan_id: selectedPlan,
+          customer_name: formData.name,
+          email: formData.email,
+          company_name: formData.company,
+          status: 'pending'
+        })
         .select()
         .single();
 

@@ -66,6 +66,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          company_name: string
+          created_at: string
+          customer_name: string
+          email: string
+          id: string
+          plan_id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          customer_name: string
+          email: string
+          id?: string
+          plan_id: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          customer_name?: string
+          email?: string
+          id?: string
+          plan_id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
