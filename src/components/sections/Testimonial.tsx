@@ -31,9 +31,9 @@ export const Testimonial = () => {
               <>
                 <img
                   loading="lazy"
-                  src="/lovable-uploads/30823178-8899-45a8-926c-27e36528d3dc.png"
+                  src="/lovable-uploads/22c2343f-6156-4f25-b0de-2aef2be01355.png"
                   className="absolute h-full w-full object-cover"
-                  alt="Enterprise video thumbnail"
+                  alt="AI Summit presentation with global data visualization"
                 />
                 <button
                   onClick={handleEnterprisePlayClick}
