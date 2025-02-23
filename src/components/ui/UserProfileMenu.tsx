@@ -161,9 +161,9 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
       </DropdownMenu>
 
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
+        <DialogContent className="sm:max-w-[425px] p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="flex items-center justify-between pr-8">
               <span>Personal Information</span>
               {!isEditing && (
                 <Button 
@@ -176,7 +176,8 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               )}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -320,8 +321,9 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
               />
             </div>
           </div>
+          
           {isEditing && (
-            <DialogFooter>
+            <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
               <Button onClick={handleSave}>Save Changes</Button>
             </DialogFooter>

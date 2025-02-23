@@ -51,7 +51,7 @@ function Calendar({
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
         caption_dropdowns: "dropdown-buttons inline-flex gap-1",
-        dropdown: "appearance-none outline-none inline-flex bg-transparent px-2 py-0.5 text-sm font-medium text-center focus:ring-1 rounded-md focus:ring-primary [&>option]:bg-popover focus-visible:ring-1",
+        dropdown: "appearance-none outline-none inline-flex bg-transparent px-2 py-0.5 text-sm font-medium text-center cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md focus:ring-1 focus:ring-primary [&>option]:bg-popover [&>svg]:hidden",
         vhidden: "hidden",
         ...classNames,
       }}
