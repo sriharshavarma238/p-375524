@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
-import { UserCircle } from "lucide-react";
+import { UserCircle, Loader } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserProfileMenu } from "@/components/ui/UserProfileMenu";
 
@@ -388,7 +388,7 @@ export const Navbar = () => {
 
           <ActionButton type="submit" className="w-full" disabled={isLoggingIn}>
             {isLoggingIn ? <div className="flex items-center gap-2 justify-center">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" />
                 Logging in...
               </div> : 'Login'}
           </ActionButton>
