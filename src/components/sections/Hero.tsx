@@ -87,7 +87,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[900px] w-[100vw] flex items-center justify-center overflow-x-clip">
+    <section className="relative min-h-[900px] w-[100vw] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         <img
           loading="lazy"
