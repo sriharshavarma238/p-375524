@@ -10,21 +10,21 @@ import { ChatSupport } from "@/components/chat/ChatSupport";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-clip">
       <header className="sticky top-0 z-50">
         <Navbar />
       </header>
 
       <main className="flex-1">
-        <section id="home">
+        <section id="home" className="overflow-x-clip">
           <Hero />
         </section>
 
-        <section id="features">
+        <section id="features" className="overflow-x-clip">
           <Features />
         </section>
 
-        <section id="solutions" className="bg-white w-[100vw] py-28 px-4 md:px-16">
+        <section id="solutions" className="bg-white w-[100vw] py-28 px-4 md:px-16 overflow-x-clip">
           <div className="max-w-[1440px] mx-auto">
             <h2 className="text-4xl font-bold mb-12">Our Solutions</h2>
             <div className="grid md:grid-cols-3 gap-8">
