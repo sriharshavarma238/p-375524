@@ -111,7 +111,7 @@ export const Hero = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-[768px] mx-auto px-4 text-center">
+      <div className="relative z-10 w-full max-w-[768px] mx-auto px-4 md:px-6 text-center">
         <h1 className="text-[#FFEA00] text-[56px] font-bold leading-[67px] md:leading-[67px] max-md:text-[40px] max-md:leading-[54px]">
           Scaling Enterprises at the Speed of Thought
         </h1>

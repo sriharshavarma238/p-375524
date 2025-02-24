@@ -89,11 +89,11 @@ export const Features = () => {
   };
 
   return (
-    <section className="bg-white w-full py-28 px-4 md:px-16">
-      <div className="max-w-[1440px] mx-auto">
+    <section className="bg-white w-full py-16 md:py-28">
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-16">
         <div className="flex flex-col md:flex-row gap-[40px_80px] items-center">
-          <div className="flex-1">
-            <h2 className="text-[40px] font-bold leading-[48px] max-md:text-[32px] max-md:leading-[38px]">
+          <div className="flex-1 w-full">
+            <h2 className="text-[32px] md:text-[40px] font-bold leading-[1.2] md:leading-[48px]">
               Long heading is what you see here in this feature section
             </h2>
 
@@ -117,7 +117,7 @@ export const Features = () => {
             </div>
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             <img
               loading="lazy"
               srcSet="https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/d1f8acffd5aaf94aaf10455f3c7690adde6b3103c133f0ecb7457fbce09a0581?placeholderIfAbsent=true&width=100 100w, https://cdn.builder.io/api/v1/image/assets/99f09873d7dd4ddcb35f7bed72e0718c/d1f8acffd5aaf94aaf10455f3c7690adde6b3103c133f0ecb7457fbce09a0581?placeholderIfAbsent=true&width=2000 2000w"
@@ -127,8 +127,8 @@ export const Features = () => {
           </div>
         </div>
 
-        <div className="mt-32">
-          <h2 className="text-[32px] font-bold mb-12">
+        <div className="mt-20 md:mt-32">
+          <h2 className="text-[28px] md:text-[32px] font-bold mb-8 md:mb-12">
             Transforming Data into Actionable Insights with Quantum AI
           </h2>
           
@@ -141,7 +141,7 @@ export const Features = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             <InsightStep
               image="/lovable-uploads/462eb367-4541-4da1-a84e-3966867f8fc2.png"
               title="Step 1: AI Scanning for Comprehensive Data Analysis"
