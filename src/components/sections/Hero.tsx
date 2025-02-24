@@ -92,7 +92,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[900px] w-full flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[900px] w-full flex items-center justify-center overflow-x-hidden">
       <div className="absolute inset-0 w-full h-full">
         <img
           loading="lazy"
@@ -111,12 +111,12 @@ export const Hero = () => {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-[768px] mx-auto px-4 md:px-6 text-center">
-        <h1 className="text-[#FFEA00] text-[56px] font-bold leading-[67px] md:leading-[67px] max-md:text-[40px] max-md:leading-[54px]">
+      <div className="relative z-10 w-full max-w-[768px] mx-auto px-4 text-center">
+        <h1 className="text-[#FFEA00] text-4xl md:text-[56px] font-bold leading-tight md:leading-[67px]">
           Scaling Enterprises at the Speed of Thought
         </h1>
 
-        <p className="text-[#00F6FF] text-lg font-normal leading-[27px] mt-6">
+        <p className="text-[#00F6FF] text-base md:text-lg font-normal leading-relaxed md:leading-[27px] mt-6">
           Unlock the potential of Quantum AI-driven insights to propel your
           business into new markets. Stay ahead of the competition with
           data-backed strategies designed for rapid expansion.
