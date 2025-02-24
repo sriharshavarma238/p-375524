@@ -89,7 +89,7 @@ export const Features = () => {
   };
 
   return (
-    <section className="bg-white w-full py-16 md:py-28">
+    <section className="bg-white w-[100vw] py-16 md:py-28">
       <div className="w-full max-w-[1440px] mx-auto px-4 md:px-16">
         <div className="flex flex-col md:flex-row gap-[40px_80px] items-center">
           <div className="flex-1 w-full">

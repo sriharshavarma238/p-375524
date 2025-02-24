@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,7 +32,6 @@ export const Hero = () => {
     setIsSubmitting(true);
 
     try {
-      // Store the demo request in Supabase
       const { error: dbError } = await supabase
         .from('demo_requests')
         .insert([{
@@ -47,7 +45,6 @@ export const Hero = () => {
 
       if (dbError) throw dbError;
 
-      // Send confirmation email
       const { error: emailError } = await supabase.functions.invoke('send-demo-confirmation', {
         body: {
           companyName: formData.companyName,
@@ -61,14 +58,12 @@ export const Hero = () => {
         console.error("Error sending confirmation email:", emailError);
       }
       
-      // Show success message
       toast({
         title: "Demo Request Received",
         description: "We'll get back to you within 24 hours to schedule your demo. Please check your email for confirmation.",
         duration: 5000,
       });
       
-      // Close modal and reset form
       setIsDemoModalOpen(false);
       setFormData({
         companyName: "",
@@ -92,7 +87,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[900px] w-full flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[900px] w-[100vw] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         <img
           loading="lazy"
