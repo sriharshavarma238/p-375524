@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -316,9 +317,18 @@ export const Navbar = () => {
                   </button>
                 </div>
               ) : (
-                <ActionButton onClick={handleGetStarted} className="w-full mt-4 transform hover:scale-105 transition-all duration-200">
-                  Get Started
-                </ActionButton>
+                <div className="flex flex-col gap-4">
+                  <ActionButton onClick={handleGetStarted} className="w-full transform hover:scale-105 transition-all duration-200">
+                    Get Started
+                  </ActionButton>
+                  <ActionButton 
+                    onClick={() => setShowLoginModal(true)} 
+                    variant="cyan"
+                    className="w-full transform hover:scale-105 transition-all duration-200"
+                  >
+                    Log in
+                  </ActionButton>
+                </div>
               )}
             </div>
           </SheetContent>
