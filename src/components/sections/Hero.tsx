@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -89,15 +90,22 @@ export const Hero = () => {
   return (
     <section className="relative min-h-[900px] w-[100vw] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
-        <img
-          loading="lazy"
-          src="/lovable-uploads/624f1b55-9dc7-4ac0-9031-726c2204db25.png"
-          className="w-full h-full object-cover [image-rendering:pixelated] scale-[1.01]"
-          style={{
-            imageRendering: 'pixelated'
-          }}
-          alt="City skyline view from a high-rise office"
-        />
+        <picture>
+          <source 
+            media="(max-width: 768px)" 
+            srcSet="/lovable-uploads/e261233a-cfd3-4dad-843e-52936cd3d3c9.png"
+          />
+          <source 
+            media="(min-width: 769px)" 
+            srcSet="/lovable-uploads/624f1b55-9dc7-4ac0-9031-726c2204db25.png"
+          />
+          <img
+            loading="lazy"
+            src="/lovable-uploads/624f1b55-9dc7-4ac0-9031-726c2204db25.png"
+            className="w-full h-full object-cover [image-rendering:pixelated] scale-[1.01]"
+            alt="City skyline view"
+          />
+        </picture>
         <div 
           className="absolute inset-0 bg-black/40"
           style={{
