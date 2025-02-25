@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -253,7 +252,7 @@ export const Navbar = () => {
           {user ? (
             <UserProfileMenu 
               user={user}
-              textColorClass={textColorClass}
+              textColorClass="text-gray-900"
               onLogout={handleLogout}
             />
           ) : (
@@ -295,29 +294,14 @@ export const Navbar = () => {
               </Link>
               {user ? (
                 <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                      <UserCircle className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{user.user_metadata?.full_name || 'User'}</div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </div>
-                  </div>
-                  {user.user_metadata?.company_name && (
-                    <div className="text-sm text-gray-600 mb-3">
-                      Company: {user.user_metadata.company_name}
-                    </div>
-                  )}
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full text-center py-2 text-red-600 hover:text-red-700 transition-colors duration-200 border border-red-200 rounded-md hover:bg-red-50"
-                  >
-                    Log out
-                  </button>
+                  <UserProfileMenu 
+                    user={user}
+                    textColorClass="text-gray-900"
+                    onLogout={handleLogout}
+                  />
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 mt-4">
                   <ActionButton onClick={handleGetStarted} className="w-full transform hover:scale-105 transition-all duration-200">
                     Get Started
                   </ActionButton>

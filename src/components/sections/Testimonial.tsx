@@ -13,10 +13,10 @@ export const Testimonial = () => {
     <section className="bg-white w-[100vw] py-28 px-4 md:px-16">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row-reverse gap-[40px_80px] items-center animate-fade-in">
-          <div className="flex-1 relative w-full min-h-[300px] md:min-h-[640px] overflow-hidden rounded-2xl shadow-lg">
+          <div className="flex-1 relative w-full aspect-video md:min-h-[640px] overflow-hidden rounded-2xl shadow-lg">
             {isEnterpriseVideoPlaying ? (
               <video
-                className="absolute h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 autoPlay
                 controls
                 playsInline
@@ -32,7 +32,7 @@ export const Testimonial = () => {
                 <img
                   loading="lazy"
                   src="/lovable-uploads/22c2343f-6156-4f25-b0de-2aef2be01355.png"
-                  className="absolute h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   alt="AI Summit presentation with global data visualization"
                 />
                 <button
