@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -252,7 +253,7 @@ export const Navbar = () => {
           {user ? (
             <UserProfileMenu 
               user={user}
-              textColorClass="text-gray-900"
+              textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
               onLogout={handleLogout}
             />
           ) : (
@@ -276,7 +277,7 @@ export const Navbar = () => {
             </button>
           </SheetTrigger>
           <SheetContent>
-            <div className="flex flex-col gap-4 pt-8">
+            <div className="flex flex-col gap-4 pt-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
               <button onClick={() => handleNavigation('hero')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
                 Home
               </button>
@@ -298,6 +299,7 @@ export const Navbar = () => {
                     user={user}
                     textColorClass="text-gray-900"
                     onLogout={handleLogout}
+                    isMobile={true}
                   />
                 </div>
               ) : (

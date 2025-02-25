@@ -38,9 +38,10 @@ interface UserProfileMenuProps {
   user: any;
   textColorClass: string;
   onLogout: () => Promise<void>;
+  isMobile?: boolean;
 }
 
-export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileMenuProps) => {
+export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = false }: UserProfileMenuProps) => {
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -109,56 +110,91 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout }: UserProfileM
   
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200">
-          <UserCircle className={`w-6 h-6 ${textColorClass}`} />
-          <span className={textColorClass}>{user.email}</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[280px]">
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer flex items-center gap-2 p-2">
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-[280px] p-2">
-              <DropdownMenuItem 
-                onClick={() => {
-                  setShowPersonalInfo(true);
-                  setIsEditing(false);
-                }}
-                className="cursor-pointer flex items-center gap-2 p-2 mb-1"
-              >
-                <User className="h-4 w-4" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Personal Information</span>
-                  <span className="text-xs text-gray-500">Profile details and preferences</span>
-                </div>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem 
-                onClick={() => setShowCardDetails(true)}
-                className="cursor-pointer flex items-center gap-2 p-2 mb-1"
-              >
-                <CreditCard className="h-4 w-4" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Card Details</span>
-                  <span className="text-xs text-gray-500">Manage payment methods</span>
-                </div>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator className="my-2" />
-              
-              <DropdownMenuItem 
-                onClick={onLogout} 
-                className="cursor-pointer flex items-center gap-2 p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {isMobile ? (
+        <div className="w-full">
+          <div className="flex items-center gap-3 mb-4">
+            <UserCircle className="h-6 w-6 text-gray-900" />
+            <div className="overflow-hidden">
+              <div className="font-medium text-gray-900 truncate">{user.user_metadata?.full_name || 'User'}</div>
+              <div className="text-sm text-gray-500 truncate">{user.email}</div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <button
+              onClick={() => setShowPersonalInfo(true)}
+              className="w-full flex items-center gap-2 p-2 text-left text-gray-900 hover:bg-gray-100 rounded-md"
+            >
+              <User className="h-4 w-4" />
+              <span>Personal Information</span>
+            </button>
+            <button
+              onClick={() => setShowCardDetails(true)}
+              className="w-full flex items-center gap-2 p-2 text-left text-gray-900 hover:bg-gray-100 rounded-md"
+            >
+              <CreditCard className="h-4 w-4" />
+              <span>Card Details</span>
+            </button>
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center gap-2 p-2 text-left text-red-600 hover:bg-red-50 rounded-md"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200">
+            <UserCircle className={`w-6 h-6 ${textColorClass}`} />
+            <span className={`${textColorClass} truncate max-w-[200px]`}>{user.email}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[280px]">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="cursor-pointer flex items-center gap-2 p-2">
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-[280px] p-2">
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setShowPersonalInfo(true);
+                    setIsEditing(false);
+                  }}
+                  className="cursor-pointer flex items-center gap-2 p-2 mb-1"
+                >
+                  <User className="h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Personal Information</span>
+                    <span className="text-xs text-gray-500">Profile details and preferences</span>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  onClick={() => setShowCardDetails(true)}
+                  className="cursor-pointer flex items-center gap-2 p-2 mb-1"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Card Details</span>
+                    <span className="text-xs text-gray-500">Manage payment methods</span>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="my-2" />
+                
+                <DropdownMenuItem 
+                  onClick={onLogout} 
+                  className="cursor-pointer flex items-center gap-2 p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
         <DialogContent className="sm:max-w-[425px] p-6">
