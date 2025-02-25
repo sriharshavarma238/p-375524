@@ -66,6 +66,8 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
 
   const years = Array.from({ length: toYear - fromYear + 1 }, (_, i) => toYear - i);
 
+  const displayName = user.user_metadata?.full_name || 'User';
+
   const handleSave = async () => {
     try {
       const { error } = await supabase.auth.updateUser({
@@ -115,7 +117,7 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
           <div className="flex items-center gap-3 mb-4">
             <UserCircle className="h-6 w-6 text-gray-900" />
             <div className="overflow-hidden">
-              <div className="font-medium text-gray-900 truncate">{user.user_metadata?.full_name || 'User'}</div>
+              <div className="font-medium text-gray-900 truncate">{displayName}</div>
               <div className="text-sm text-gray-500 truncate">{user.email}</div>
             </div>
           </div>
@@ -147,7 +149,7 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200">
             <UserCircle className={`w-6 h-6 ${textColorClass}`} />
-            <span className={`${textColorClass} truncate max-w-[200px]`}>{user.email}</span>
+            <span className={`${textColorClass} truncate max-w-[200px]`}>{displayName}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[280px]">
             <DropdownMenuSub>
