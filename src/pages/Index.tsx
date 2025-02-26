@@ -7,6 +7,7 @@ import { Testimonial } from "@/components/sections/Testimonial";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { Footer } from "@/components/layout/Footer";
 import { ChatSupport } from "@/components/chat/ChatSupport";
+import { RealTimeAnalytics } from "@/components/sections/RealTimeAnalytics";
 
 const Index = () => {
   return (
@@ -16,15 +17,15 @@ const Index = () => {
       </header>
 
       <main className="flex-1">
-        <section id="home">
+        <section id="home" className="animate-fade-in">
           <Hero />
         </section>
 
-        <section id="features">
+        <section id="features" className="animate-fade-in-up">
           <Features />
         </section>
 
-        <section id="solutions" className="bg-white w-[100vw] py-28 px-4 md:px-16">
+        <section id="solutions" className="bg-white w-[100vw] py-28 px-4 md:px-16 animate-fade-in-up">
           <div className="max-w-[1440px] mx-auto">
             <h2 className="text-4xl font-bold mb-12">Our Solutions</h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -69,6 +70,8 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        <RealTimeAnalytics />
 
         <Testimonial />
         <CallToAction />

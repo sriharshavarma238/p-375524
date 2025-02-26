@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -29,10 +30,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { UserCircle, Settings, LogOut, Building, Mail, CalendarIcon, CreditCard, User } from "lucide-react";
+import { UserCircle, Settings, LogOut, Building, Mail, CalendarIcon, CreditCard, User, Upload } from "lucide-react";
 import { formatDistance, format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileMenuProps {
   user: any;
@@ -45,11 +47,70 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     full_name: user.user_metadata?.full_name || '',
     gender: user.user_metadata?.gender || '',
     date_of_birth: user.user_metadata?.date_of_birth || '',
+    avatar_url: user.user_metadata?.avatar_url || ''
   });
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image under 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { ...user.user_metadata, avatar_url: publicUrl }
+      });
+
+      if (updateError) throw updateError;
+
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile picture",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const mockCardData = {
     cardNumber: "4111 **** **** ****",
@@ -115,7 +176,22 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
       {isMobile ? (
         <div className="w-full">
           <div className="flex items-center gap-3 mb-4">
-            <UserCircle className="h-6 w-6 text-gray-900" />
+            <div className="relative group">
+              <Avatar className="h-10 w-10 cursor-pointer transition-transform hover:scale-105">
+                <AvatarImage src={formData.avatar_url} alt={displayName} />
+                <AvatarFallback>
+                  <UserCircle className="h-6 w-6 text-gray-900" />
+                </AvatarFallback>
+              </Avatar>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+            </div>
             <div className="overflow-hidden">
               <div className="font-medium text-gray-900 truncate">{displayName}</div>
               <div className="text-sm text-gray-500 truncate">{user.email}</div>
@@ -147,8 +223,23 @@ export const UserProfileMenu = ({ user, textColorClass, onLogout, isMobile = fal
         </div>
       ) : (
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200">
-            <UserCircle className={`w-6 h-6 ${textColorClass}`} />
+          <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200 group">
+            <div className="relative" onClick={handleAvatarClick}>
+              <Avatar className="h-8 w-8 transition-transform group-hover:scale-105">
+                <AvatarImage src={formData.avatar_url} alt={displayName} />
+                <AvatarFallback>
+                  <UserCircle className={`h-6 w-6 ${textColorClass}`} />
+                </AvatarFallback>
+              </Avatar>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+            </div>
             <span className={`${textColorClass} truncate max-w-[200px]`}>{displayName}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[280px]">
