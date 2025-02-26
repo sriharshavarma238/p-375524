@@ -8,24 +8,50 @@ import { CallToAction } from "@/components/sections/CallToAction";
 import { Footer } from "@/components/layout/Footer";
 import { ChatSupport } from "@/components/chat/ChatSupport";
 import { RealTimeAnalytics } from "@/components/sections/RealTimeAnalytics";
+import { AnimatedBackground } from "@/components/sections/AnimatedBackground";
+import { motion } from "framer-motion";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      className="min-h-screen flex flex-col overflow-x-hidden relative"
+    >
+      <AnimatedBackground />
+      
       <header className="sticky top-0 z-50">
         <Navbar />
       </header>
 
-      <main className="flex-1">
-        <section id="home" className="animate-fade-in">
+      <main className="flex-1 relative z-10">
+        <motion.section 
+          id="home"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
           <Hero />
-        </section>
+        </motion.section>
 
-        <section id="features" className="animate-fade-in-up">
+        <motion.section 
+          id="features"
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
           <Features />
-        </section>
+        </motion.section>
 
-        <section id="solutions" className="bg-white w-[100vw] py-28 px-4 md:px-16 animate-fade-in-up">
+        <motion.section 
+          id="solutions" 
+          className="bg-white w-[100vw] py-28 px-4 md:px-16"
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
           <div className="max-w-[1440px] mx-auto">
             <h2 className="text-4xl font-bold mb-12">Our Solutions</h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -69,17 +95,32 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         <RealTimeAnalytics />
 
-        <Testimonial />
-        <CallToAction />
+        <motion.section
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Testimonial />
+        </motion.section>
+
+        <motion.section
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <CallToAction />
+        </motion.section>
       </main>
 
       <Footer />
       <ChatSupport />
-    </div>
+    </motion.div>
   );
 };
 
