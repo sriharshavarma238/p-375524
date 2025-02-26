@@ -1,9 +1,10 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Upload, Check } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 interface ProfilePictureProps {
   url?: string;
@@ -23,6 +24,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const sizeClasses = {
     sm: 'w-10 h-10',
@@ -38,7 +40,6 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       const file = event.target.files?.[0];
       if (!file) return;
 
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "File too large",
@@ -48,25 +49,16 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
         return;
       }
 
-      // Generate unique file name
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}${Date.now()}.${fileExt}`;
       const filePath = `profile-pictures/${fileName}`;
 
-      // Upload file to Supabase Storage
       const { error: uploadError, data } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true,
-          onUploadProgress: (progress) => {
-            setUploadProgress((progress.loaded / progress.total) * 100);
-          },
-        });
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
@@ -90,74 +82,130 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
     }
   };
 
+  const containerVariants = {
+    hover: { 
+      scale: 1.05,
+      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    },
+    initial: { 
+      scale: 1,
+      boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+    }
+  };
+
+  const overlayVariants = {
+    hover: { 
+      opacity: 1,
+      backdropFilter: "blur(3px)",
+    },
+    initial: { 
+      opacity: 0,
+      backdropFilter: "blur(0px)",
+    }
+  };
+
   return (
     <motion.div
       className={cn(
-        "relative rounded-full overflow-hidden bg-gray-100",
+        "relative rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500 p-[2px]",
         sizeClasses[size],
         className
       )}
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 260,
-        damping: 20
-      }}
+      initial="initial"
+      whileHover="hover"
+      variants={containerVariants}
       onHoverStart={() => setIsHovering(true)}
       onHoverEnd={() => setIsHovering(false)}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMousePosition({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100
+        });
+      }}
     >
-      {url ? (
-        <motion.img
-          src={url}
-          alt="Profile"
-          className="w-full h-full object-cover"
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.3 }}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-          <Camera className="w-1/3 h-1/3 text-gray-400" />
-        </div>
-      )}
-
-      <AnimatePresence>
-        {isHovering && !isUploading && (
-          <motion.div
-            className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => fileInputRef.current?.click()}
+      <motion.div className="w-full h-full rounded-full overflow-hidden relative">
+        {url ? (
+          <motion.img
+            src={url}
+            alt="Profile"
+            className="w-full h-full object-cover"
+            initial={{ scale: 1.2, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          />
+        ) : (
+          <motion.div 
+            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
+            animate={{ 
+              background: [
+                "linear-gradient(45deg, #f3f4f6, #e5e7eb)",
+                "linear-gradient(225deg, #f3f4f6, #e5e7eb)",
+                "linear-gradient(45deg, #f3f4f6, #e5e7eb)"
+              ]
+            }}
+            transition={{ duration: 4, repeat: Infinity }}
           >
-            <Upload className="w-1/4 h-1/4 text-white" />
+            <Camera className="w-1/3 h-1/3 text-gray-400" />
           </motion.div>
         )}
 
-        {isUploading && (
-          <motion.div
-            className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+        <AnimatePresence>
+          {isHovering && !isUploading && (
             <motion.div
-              className="w-3/4 h-1 bg-gray-200 rounded-full overflow-hidden"
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
+              className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
+              variants={overlayVariants}
+              initial="initial"
+              animate="hover"
+              exit="initial"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%)`
+              }}
             >
               <motion.div
-                className="h-full bg-blue-500"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: uploadProgress / 100 }}
-                transition={{ duration: 0.3 }}
-              />
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <Upload className="w-1/4 h-1/4 text-white" />
+              </motion.div>
             </motion.div>
-            <p className="text-white text-xs mt-2">{Math.round(uploadProgress)}%</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          {isUploading && (
+            <motion.div
+              className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="w-3/4 h-1 bg-gray-200/30 rounded-full overflow-hidden"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+              >
+                <motion.div
+                  className="h-full bg-blue-500"
+                  style={{ 
+                    width: `${uploadProgress}%`,
+                    background: "linear-gradient(90deg, #3b82f6, #60a5fa)"
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.div>
+              <motion.p 
+                className="text-white text-xs mt-2"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {Math.round(uploadProgress)}%
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       <input
         type="file"
