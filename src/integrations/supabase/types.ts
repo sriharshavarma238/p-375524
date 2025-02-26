@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_data: {
+        Row: {
+          id: string
+          metric_name: string
+          timestamp: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metric_name: string
+          timestamp?: string
+          value: number
+        }
+        Update: {
+          id?: string
+          metric_name?: string
+          timestamp?: string
+          value?: number
+        }
+        Relationships: []
+      }
       demo_requests: {
         Row: {
           business_challenge: string | null

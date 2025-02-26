@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 interface AnalyticsData {
+  id: string;
   metric_name: string;
   value: number;
   timestamp: string;
