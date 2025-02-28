@@ -20,7 +20,7 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
-  const [isOverDarkSection, setIsOverDarkSection] = useState(true);
+  const [isOverSpecialSection, setIsOverSpecialSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -82,47 +82,33 @@ export const Navbar = () => {
       // Get the element at the center of the viewport
       const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
       
-      // Check if we're over hero section
-      const isHero = elements.some(element => {
-        const isHeroSection = (el: Element): boolean => {
+      // Check if we're over home section
+      const isHomeSection = elements.some(element => {
+        const isHome = (el: Element): boolean => {
           if (!el) return false;
           if (el.id === 'home') {
             return true;
           }
-          return el.parentElement ? isHeroSection(el.parentElement) : false;
+          return el.parentElement ? isHome(el.parentElement) : false;
         };
-        return isHeroSection(element);
+        return isHome(element);
       });
       
-      // Check background color using computed styles
-      const isDark = elements.some(element => {
-        // Check if the background is dark
-        const style = window.getComputedStyle(element);
-        const bgColor = style.backgroundColor;
-        
-        // If element has a background color
-        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-          // Convert rgb(a) to values
-          const rgb = bgColor.match(/\d+/g);
-          if (rgb && rgb.length >= 3) {
-            const [r, g, b] = rgb.map(Number);
-            // Calculate brightness (perceived brightness formula)
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            // If brightness < 128, it's dark
-            return brightness < 128;
+      // Check if we're over solutions section
+      const isSolutionsSection = elements.some(element => {
+        const isSolutions = (el: Element): boolean => {
+          if (!el) return false;
+          if (el.id === 'solutions') {
+            return true;
           }
-        }
-        
-        // Check for dark glass-morphism and gradient backgrounds
-        return element.classList.contains('glass-morphism') || 
-               element.classList.contains('bg-gradient-to-b') ||
-               element.classList.contains('from-[#000000]') ||
-               element.classList.contains('to-[#000000]') ||
-               element.classList.contains('via-[#1a1a1a]');
+          return el.parentElement ? isSolutions(el.parentElement) : false;
+        };
+        return isSolutions(element);
       });
-
-      setIsOverHeroSection(isHero);
-      setIsOverDarkSection(isDark);
+      
+      // Update state based on which section we're over
+      setIsOverHeroSection(isHomeSection);
+      setIsOverSpecialSection(isHomeSection || isSolutionsSection);
     };
     
     window.addEventListener('scroll', handleScroll);
@@ -304,8 +290,8 @@ export const Navbar = () => {
     }
   };
 
-  // Determine text color based on background
-  const textColorClass = isOverDarkSection ? 'text-white' : 'text-gray-800';
+  // Determine text color based on which section we're over
+  const textColorClass = isOverSpecialSection ? 'text-white' : 'text-gray-800';
 
   return <>
     <nav className="fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-300">
@@ -353,13 +339,13 @@ export const Navbar = () => {
                   user={user}
                   profileUrl={profileUrl}
                   onProfileUpload={handleProfileUpload}
-                  textColorClass={isOverDarkSection ? 'text-white' : 'text-gray-900'}
+                  textColorClass={isOverSpecialSection ? 'text-white' : 'text-gray-900'}
                   onLogout={handleLogout}
                 />
               </div>
             ) : (
               <>
-                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverDarkSection} className="transform hover:scale-105 transition-all duration-200">
+                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverSpecialSection} className="transform hover:scale-105 transition-all duration-200">
                   Log in
                 </ActionButton>
                 <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">

@@ -229,7 +229,7 @@ export const UserProfileMenu = ({
       )}
 
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
-        <DialogContent className="sm:max-w-[425px] p-6">
+        <DialogContent className="sm:max-w-[425px] p-6 bg-white text-gray-900 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center justify-between pr-8">
               <span>Personal Information</span>
@@ -256,33 +256,33 @@ export const UserProfileMenu = ({
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="text-gray-800">Full Name</Label>
               <Input
                 id="name"
                 name="full_name"
                 value={isEditing ? formData.full_name : user.user_metadata?.full_name || ''}
                 onChange={handleChange}
-                className="w-full"
+                className="w-full bg-gray-50 text-gray-900"
                 disabled={!isEditing}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-800">Email</Label>
               <Input
                 id="email"
                 value={user.email}
-                className="w-full"
+                className="w-full bg-gray-50 text-gray-900"
                 disabled
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="gender">Gender</Label>
+              <Label htmlFor="gender" className="text-gray-800">Gender</Label>
               {isEditing ? (
                 <Select
                   value={formData.gender}
                   onValueChange={handleGenderChange}
                 >
-                  <SelectTrigger id="gender">
+                  <SelectTrigger id="gender" className="bg-gray-50 text-gray-900">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -295,21 +295,21 @@ export const UserProfileMenu = ({
                 <Input
                   id="gender"
                   value={user.user_metadata?.gender || 'Not specified'}
-                  className="w-full"
+                  className="w-full bg-gray-50 text-gray-900"
                   disabled
                 />
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="dob">Date of Birth</Label>
+              <Label htmlFor="dob" className="text-gray-800">Date of Birth</Label>
               {isEditing ? (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.date_of_birth && "text-muted-foreground"
+                        "w-full justify-start text-left font-normal bg-gray-50 text-gray-900",
+                        !formData.date_of_birth && "text-gray-500"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -319,8 +319,8 @@ export const UserProfileMenu = ({
                   <PopoverContent className="w-auto p-0" align="start">
                     <div className="p-3 border-b">
                       <div className="space-y-2">
-                        <Label>Date of Birth</Label>
-                        <div className="text-sm text-muted-foreground">
+                        <Label className="text-gray-800">Date of Birth</Label>
+                        <div className="text-sm text-gray-600">
                           Please select your date of birth
                         </div>
                       </div>
@@ -340,24 +340,24 @@ export const UserProfileMenu = ({
                         months: "space-y-4",
                         month: "space-y-4",
                         caption: "flex justify-center pt-1 relative items-center gap-2",
-                        caption_label: "text-sm font-medium",
+                        caption_label: "text-sm font-medium text-gray-900",
                         nav: "flex items-center gap-1",
                         nav_button: cn(
-                          "h-7 w-7 bg-transparent p-0 hover:opacity-70 transition-opacity"
+                          "h-7 w-7 bg-transparent p-0 hover:opacity-70 transition-opacity text-gray-700"
                         ),
                         nav_button_previous: "absolute left-1",
                         nav_button_next: "absolute right-1",
                         table: "w-full border-collapse",
                         head_row: "flex",
-                        head_cell: "w-9 font-normal text-[0.8rem] text-muted-foreground",
+                        head_cell: "w-9 font-normal text-[0.8rem] text-gray-600",
                         row: "flex w-full mt-2",
                         cell: cn(
-                          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent",
+                          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-gray-100 text-gray-900",
                           "first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
                         ),
                         day: cn(
-                          "h-9 w-9 p-0 font-normal",
-                          "hover:bg-accent hover:text-accent-foreground",
+                          "h-9 w-9 p-0 font-normal text-gray-900",
+                          "hover:bg-gray-100",
                           "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
                           "disabled:opacity-50 disabled:pointer-events-none"
                         ),
@@ -366,14 +366,14 @@ export const UserProfileMenu = ({
                           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                           "focus:bg-primary focus:text-primary-foreground"
                         ),
-                        day_today: "bg-accent text-accent-foreground",
-                        day_outside: "text-muted-foreground opacity-50",
-                        day_disabled: "text-muted-foreground opacity-50",
+                        day_today: "bg-gray-100 text-gray-900",
+                        day_outside: "text-gray-400 opacity-50",
+                        day_disabled: "text-gray-400 opacity-50",
                         day_hidden: "invisible",
                       }}
                     />
                     <div className="p-3 border-t">
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-gray-600">
                         Use the year dropdown above to quickly navigate to your birth year
                       </div>
                     </div>
@@ -383,17 +383,17 @@ export const UserProfileMenu = ({
                 <Input
                   id="dob"
                   value={user.user_metadata?.date_of_birth ? format(new Date(user.user_metadata.date_of_birth), "MMMM d, yyyy") : ''}
-                  className="w-full"
+                  className="w-full bg-gray-50 text-gray-900"
                   disabled
                 />
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="joined">Member Since</Label>
+              <Label htmlFor="joined" className="text-gray-800">Member Since</Label>
               <Input
                 id="joined"
                 value={joinedDate}
-                className="w-full"
+                className="w-full bg-gray-50 text-gray-900"
                 disabled
               />
             </div>
@@ -401,17 +401,17 @@ export const UserProfileMenu = ({
           
           {isEditing && (
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)} className="bg-white text-gray-900 border-gray-300 hover:bg-gray-50">Cancel</Button>
+              <Button onClick={handleSave} className="bg-blue-600 text-white hover:bg-blue-700">Save Changes</Button>
             </DialogFooter>
           )}
         </DialogContent>
       </Dialog>
 
       <Dialog open={showCardDetails} onOpenChange={setShowCardDetails}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-white text-gray-900">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-gray-900">
               <CreditCard className="h-5 w-5" />
               <span>Card Details</span>
             </DialogTitle>
@@ -419,23 +419,23 @@ export const UserProfileMenu = ({
           <div className="grid gap-4 py-4">
             <div className="p-6 border rounded-lg space-y-4 bg-gray-50">
               <div className="flex justify-between items-center">
-                <Label>Card Type</Label>
-                <span className="font-medium">{mockCardData.cardType}</span>
+                <Label className="text-gray-800">Card Type</Label>
+                <span className="font-medium text-gray-900">{mockCardData.cardType}</span>
               </div>
               <div className="flex justify-between items-center">
-                <Label>Card Number</Label>
-                <span className="font-mono">{mockCardData.cardNumber}</span>
+                <Label className="text-gray-800">Card Number</Label>
+                <span className="font-mono text-gray-900">{mockCardData.cardNumber}</span>
               </div>
               <div className="flex justify-between items-center">
-                <Label>Card Holder</Label>
-                <span>{mockCardData.cardHolder}</span>
+                <Label className="text-gray-800">Card Holder</Label>
+                <span className="text-gray-900">{mockCardData.cardHolder}</span>
               </div>
               <div className="flex justify-between items-center">
-                <Label>Expiry Date</Label>
-                <span>{mockCardData.expiryDate}</span>
+                <Label className="text-gray-800">Expiry Date</Label>
+                <span className="text-gray-900">{mockCardData.expiryDate}</span>
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-600 mt-2">
               For security reasons, your full card number and CVV are not displayed.
             </p>
           </div>
