@@ -53,9 +53,28 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       const fileName = `${Math.random().toString(36).substring(2)}${Date.now()}.${fileExt}`;
       const filePath = `profile-pictures/${fileName}`;
 
+      // Simulate progress
+      const simulateProgress = () => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress > 90) {
+            clearInterval(interval);
+            progress = 90;
+          }
+          setUploadProgress(progress);
+        }, 200);
+        return interval;
+      };
+      
+      const progressInterval = simulateProgress();
+
       const { error: uploadError, data } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (uploadError) throw uploadError;
 
@@ -77,8 +96,10 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
         variant: "destructive"
       });
     } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 1000); // Wait for animation to complete
     }
   };
 

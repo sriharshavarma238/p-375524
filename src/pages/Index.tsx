@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { Features } from "@/components/sections/Features";
@@ -13,7 +13,11 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { motion } from "framer-motion";
 
 const Index = () => {
+  const [isOverHeroSection, setIsOverHeroSection] = useState(true);
+  const [profileUrl, setProfileUrl] = useState<string | undefined>(undefined);
+
   useEffect(() => {
+    // Setup intersection observers for animations
     const observerOptions = {
       root: null,
       rootMargin: '0px',
@@ -32,12 +36,110 @@ const Index = () => {
     const elements = document.querySelectorAll('.scroll-animation');
     elements.forEach(el => observer.observe(el));
 
-    return () => observer.disconnect();
+    // Setup navbar color change on scroll
+    const handleScroll = () => {
+      const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
+      const isHero = elements.some(element => {
+        const isHeroSection = (el: Element): boolean => {
+          if (!el) return false;
+          if (el.id === 'home') {
+            return true;
+          }
+          return el.parentElement ? isHeroSection(el.parentElement) : false;
+        };
+        return isHeroSection(element);
+      });
+      setIsOverHeroSection(isHero);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleProfileUpload = (url: string) => {
     console.log("Profile picture uploaded:", url);
-    // Handle the profile picture update here
+    setProfileUrl(url);
+    // Save to user profile or local storage here
+    localStorage.setItem('profilePicture', url);
+  };
+
+  // Load profile picture from local storage on mount
+  useEffect(() => {
+    const savedProfileUrl = localStorage.getItem('profilePicture');
+    if (savedProfileUrl) {
+      setProfileUrl(savedProfileUrl);
+    }
+  }, []);
+
+  // Different animation variants for each section
+  const heroVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.8, 
+        ease: "easeOut" 
+      }
+    }
+  };
+
+  const featuresVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        duration: 0.6, 
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const solutionsVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { 
+        duration: 0.7, 
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const testimonialVariants = {
+    hidden: { opacity: 0, rotateY: 10 },
+    visible: { 
+      opacity: 1, 
+      rotateY: 0,
+      transition: { 
+        duration: 0.8, 
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  const ctaVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: { 
+        duration: 0.6,
+        type: "spring",
+        stiffness: 300,
+        damping: 15
+      }
+    }
   };
 
   return (
@@ -53,6 +155,7 @@ const Index = () => {
           <Navbar />
           <div className="py-2">
             <ProfilePicture
+              url={profileUrl}
               size="sm"
               onUpload={handleProfileUpload}
               className="animate-float"
@@ -64,9 +167,10 @@ const Index = () => {
       <main className="flex-1 relative z-10">
         <motion.section 
           id="home"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          variants={heroVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
           className="scroll-animation"
         >
           <Hero />
@@ -74,10 +178,10 @@ const Index = () => {
 
         <motion.section 
           id="features"
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          variants={featuresVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
           className="scroll-animation"
         >
           <Features />
@@ -86,15 +190,22 @@ const Index = () => {
         <motion.section 
           id="solutions" 
           className="bg-gradient-to-b from-[#1a1a1a] to-[#000000] w-[100vw] py-28 px-4 md:px-16 scroll-animation"
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          variants={solutionsVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
         >
           <div className="max-w-[1440px] mx-auto">
             <h2 className="text-4xl font-bold mb-12 text-gradient">Our Solutions</h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+              <motion.div 
+                className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300"
+                whileHover={{ 
+                  y: -5,
+                  boxShadow: "0 30px 60px rgba(0,0,0,0.12)",
+                  transition: { duration: 0.2 }
+                }}
+              >
                 <h3 className="text-xl font-bold mb-4 text-white">Enterprise Analytics</h3>
                 <p className="text-gray-300 mb-4">
                   Advanced analytics solutions tailored for enterprise-scale operations.
@@ -104,9 +215,16 @@ const Index = () => {
                   <li>Custom reporting dashboards</li>
                   <li>Predictive analytics</li>
                 </ul>
-              </div>
+              </motion.div>
 
-              <div className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+              <motion.div 
+                className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300"
+                whileHover={{ 
+                  y: -5,
+                  boxShadow: "0 30px 60px rgba(0,0,0,0.12)",
+                  transition: { duration: 0.2, delay: 0.05 }
+                }}
+              >
                 <h3 className="text-xl font-bold mb-4 text-white">AI Integration</h3>
                 <p className="text-gray-300 mb-4">
                   Seamless AI integration solutions that enhance your existing systems.
@@ -116,9 +234,16 @@ const Index = () => {
                   <li>Natural language processing</li>
                   <li>Automated decision making</li>
                 </ul>
-              </div>
+              </motion.div>
 
-              <div className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+              <motion.div 
+                className="glass-morphism rounded-lg p-6 hover:scale-105 transition-transform duration-300"
+                whileHover={{ 
+                  y: -5,
+                  boxShadow: "0 30px 60px rgba(0,0,0,0.12)",
+                  transition: { duration: 0.2, delay: 0.1 }
+                }}
+              >
                 <h3 className="text-xl font-bold mb-4 text-white">Security & Compliance</h3>
                 <p className="text-gray-300 mb-4">
                   Comprehensive security solutions ensuring your data protection.
@@ -128,7 +253,7 @@ const Index = () => {
                   <li>Regulatory compliance</li>
                   <li>24/7 monitoring</li>
                 </ul>
-              </div>
+              </motion.div>
             </div>
           </div>
         </motion.section>
@@ -136,20 +261,20 @@ const Index = () => {
         <RealTimeAnalytics />
 
         <motion.section
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          variants={testimonialVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
           className="scroll-animation"
         >
           <Testimonial />
         </motion.section>
 
         <motion.section
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          variants={ctaVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
           className="scroll-animation"
         >
           <CallToAction />
