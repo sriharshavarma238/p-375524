@@ -272,119 +272,121 @@ export const Navbar = () => {
   const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
 
   return <>
-    <nav className="fixed w-full max-w-[1440px] px-4 md:px-16 h-[72px] flex items-center justify-between top-0 z-50 transition-colors duration-300 bg-transparent">
-      <div className="flex items-center gap-8 w-full justify-between md:justify-start">
-        <Link to="/" className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
-          <Logo />
-        </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 w-full">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-16 h-[72px] flex items-center justify-between glass-morphism">
+        <div className="flex items-center gap-8 w-full justify-between md:justify-start">
+          <Link to="/" className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
+            <Logo />
+          </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-base">
-          <button onClick={() => handleNavigation('home')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-            <span className="relative z-10">Home</span>
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
-          </button>
-          <button onClick={() => handleNavigation('features')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-            <span className="relative z-10">Features</span>
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
-          </button>
-          <button onClick={() => handleNavigation('solutions')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-            <span className="relative z-10">Solutions</span>
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
-          </button>
-          <div className="relative">
-            <button onClick={() => setIsResourcesOpen(!isResourcesOpen)} className={`flex items-center gap-1 group ${textColorClass} transition-all duration-300 ease-in-out`}>
-              <span className="relative z-10">Resources</span>
-              <svg className={`w-4 h-4 transform transition-transform duration-300 ${isResourcesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+          <div className="hidden md:flex items-center gap-8 text-base">
+            <button onClick={() => handleNavigation('home')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
+              <span className="relative z-10">Home</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
-            {isResourcesOpen && <div className="absolute w-48 bg-white shadow-lg mt-2 py-2 rounded-md animate-fade-in">
-                <Link to="/blog" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+            <button onClick={() => handleNavigation('features')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
+              <span className="relative z-10">Features</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+            </button>
+            <button onClick={() => handleNavigation('solutions')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
+              <span className="relative z-10">Solutions</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+            </button>
+            <div className="relative">
+              <button onClick={() => setIsResourcesOpen(!isResourcesOpen)} className={`flex items-center gap-1 group ${textColorClass} transition-all duration-300 ease-in-out`}>
+                <span className="relative z-10">Resources</span>
+                <svg className={`w-4 h-4 transform transition-transform duration-300 ${isResourcesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isResourcesOpen && <div className="absolute w-48 bg-white shadow-lg mt-2 py-2 rounded-md animate-fade-in">
+                  <Link to="/blog" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+                    Blog
+                  </Link>
+                  <Link to="/pricing" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+                    Pricing
+                  </Link>
+                </div>}
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4 ml-auto">
+            {user ? (
+              <div className="flex items-center">
+                <UserProfileMenu 
+                  user={user}
+                  profileUrl={profileUrl}
+                  onProfileUpload={handleProfileUpload}
+                  textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
+                  onLogout={handleLogout}
+                />
+              </div>
+            ) : (
+              <>
+                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">
+                  Log in
+                </ActionButton>
+                <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
+                  Get Started
+                </ActionButton>
+              </>
+            )}
+          </div>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className={`md:hidden ${textColorClass}`} onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </SheetTrigger>
+            <SheetContent>
+              <div className="flex flex-col gap-4 pt-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                <button onClick={() => handleNavigation('hero')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
+                  Home
+                </button>
+                <button onClick={() => handleNavigation('features')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
+                  Features
+                </button>
+                <button onClick={() => handleNavigation('solutions')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
+                  Solutions
+                </button>
+                <Link to="/blog" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
                   Blog
                 </Link>
-                <Link to="/pricing" className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+                <Link to="/pricing" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
                   Pricing
                 </Link>
-              </div>}
-          </div>
+                {user ? (
+                  <div className="border rounded-lg p-4 bg-gray-50">
+                    <UserProfileMenu 
+                      user={user}
+                      profileUrl={profileUrl}
+                      onProfileUpload={handleProfileUpload}
+                      textColorClass="text-gray-900"
+                      onLogout={handleLogout}
+                      isMobile={true}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4 mt-4">
+                    <ActionButton onClick={handleGetStarted} className="w-full transform hover:scale-105 transition-all duration-200">
+                      Get Started
+                    </ActionButton>
+                    <ActionButton 
+                      onClick={() => setShowLoginModal(true)} 
+                      variant="cyan"
+                      className="w-full transform hover:scale-105 transition-all duration-200"
+                    >
+                      Log in
+                    </ActionButton>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-
-        <div className="hidden md:flex items-center gap-4 ml-auto">
-          {user ? (
-            <div className="flex items-center">
-              <UserProfileMenu 
-                user={user}
-                profileUrl={profileUrl}
-                onProfileUpload={handleProfileUpload}
-                textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
-                onLogout={handleLogout}
-              />
-            </div>
-          ) : (
-            <>
-              <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">
-                Log in
-              </ActionButton>
-              <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
-                Get Started
-              </ActionButton>
-            </>
-          )}
-        </div>
-
-        <Sheet>
-          <SheetTrigger asChild>
-            <button className={`md:hidden ${textColorClass}`} onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </SheetTrigger>
-          <SheetContent>
-            <div className="flex flex-col gap-4 pt-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              <button onClick={() => handleNavigation('hero')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
-                Home
-              </button>
-              <button onClick={() => handleNavigation('features')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
-                Features
-              </button>
-              <button onClick={() => handleNavigation('solutions')} className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
-                Solutions
-              </button>
-              <Link to="/blog" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
-                Blog
-              </Link>
-              <Link to="/pricing" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
-                Pricing
-              </Link>
-              {user ? (
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <UserProfileMenu 
-                    user={user}
-                    profileUrl={profileUrl}
-                    onProfileUpload={handleProfileUpload}
-                    textColorClass="text-gray-900"
-                    onLogout={handleLogout}
-                    isMobile={true}
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4 mt-4">
-                  <ActionButton onClick={handleGetStarted} className="w-full transform hover:scale-105 transition-all duration-200">
-                    Get Started
-                  </ActionButton>
-                  <ActionButton 
-                    onClick={() => setShowLoginModal(true)} 
-                    variant="cyan"
-                    className="w-full transform hover:scale-105 transition-all duration-200"
-                  >
-                    Log in
-                  </ActionButton>
-                </div>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </nav>
 

@@ -129,15 +129,11 @@ const Index = () => {
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      className="min-h-screen flex flex-col overflow-x-hidden relative bg-gradient-to-b from-[#000000] via-[#1a1a1a] to-[#000000]"
+      className="min-h-screen flex flex-col overflow-x-hidden relative bg-gradient-to-b from-[#000000] via-[#1a1a1a] to-[#000000] pt-[72px]"
     >
       <AnimatedBackground />
       
-      <header className="sticky top-0 z-50 glass-morphism">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Navbar />
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 relative z-10">
         <motion.section 
