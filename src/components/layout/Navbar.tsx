@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
-import { UserCircle, Loader } from "lucide-react";
+import { UserCircle, Loader, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserProfileMenu } from "@/components/ui/UserProfileMenu";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,6 +26,7 @@ export const Navbar = () => {
   const [loginError, setLoginError] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [profileUrl, setProfileUrl] = useState<string | undefined>(undefined);
   const location = useLocation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -39,9 +42,19 @@ export const Navbar = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Try to load the profile picture from storage on component mount
+    const savedProfileUrl = localStorage.getItem('profilePicture');
+    if (savedProfileUrl) {
+      setProfileUrl(savedProfileUrl);
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
+        // If user has a profile picture in their metadata, use it
+        if (session.user.user_metadata?.avatar_url) {
+          setProfileUrl(session.user.user_metadata.avatar_url);
+        }
       }
     });
 
@@ -50,8 +63,13 @@ export const Navbar = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
+        // If user has a profile picture in their metadata, use it
+        if (session.user.user_metadata?.avatar_url) {
+          setProfileUrl(session.user.user_metadata.avatar_url);
+        }
       } else {
         setUser(null);
+        setProfileUrl(undefined);
       }
     });
 
@@ -78,6 +96,36 @@ export const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleProfileUpload = async (url: string) => {
+    setProfileUrl(url);
+    localStorage.setItem('profilePicture', url);
+    
+    // If user is logged in, update their profile in Supabase
+    if (user) {
+      try {
+        const { error } = await supabase.auth.updateUser({
+          data: { 
+            ...user.user_metadata,
+            avatar_url: url 
+          }
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Profile updated",
+          description: "Your profile picture has been updated successfully."
+        });
+      } catch (error: any) {
+        toast({
+          title: "Update failed",
+          description: error.message || "Failed to update profile picture",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   const handleGetStarted = () => {
     setIsSignUpOpen(true);
   };
@@ -85,6 +133,10 @@ export const Navbar = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
+      // Clear profile picture from local storage
+      localStorage.removeItem('profilePicture');
+      setProfileUrl(undefined);
+      
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
@@ -178,7 +230,8 @@ export const Navbar = () => {
     setLoginError(false);
     try {
       const {
-        error
+        error,
+        data
       } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password
@@ -192,6 +245,13 @@ export const Navbar = () => {
         });
         return;
       }
+      
+      // Check if user has a profile picture
+      if (data?.user?.user_metadata?.avatar_url) {
+        setProfileUrl(data.user.user_metadata.avatar_url);
+        localStorage.setItem('profilePicture', data.user.user_metadata.avatar_url);
+      }
+      
       setShowLoginModal(false);
       toast({
         title: "Welcome back!",
@@ -251,11 +311,15 @@ export const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-4 ml-auto">
           {user ? (
-            <UserProfileMenu 
-              user={user}
-              textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
-              onLogout={handleLogout}
-            />
+            <div className="flex items-center">
+              <UserProfileMenu 
+                user={user}
+                profileUrl={profileUrl}
+                onProfileUpload={handleProfileUpload}
+                textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
+                onLogout={handleLogout}
+              />
+            </div>
           ) : (
             <>
               <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">
@@ -297,6 +361,8 @@ export const Navbar = () => {
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <UserProfileMenu 
                     user={user}
+                    profileUrl={profileUrl}
+                    onProfileUpload={handleProfileUpload}
                     textColorClass="text-gray-900"
                     onLogout={handleLogout}
                     isMobile={true}

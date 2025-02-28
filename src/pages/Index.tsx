@@ -9,12 +9,10 @@ import { Footer } from "@/components/layout/Footer";
 import { ChatSupport } from "@/components/chat/ChatSupport";
 import { RealTimeAnalytics } from "@/components/sections/RealTimeAnalytics";
 import { AnimatedBackground } from "@/components/sections/AnimatedBackground";
-import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { motion } from "framer-motion";
 
 const Index = () => {
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
-  const [profileUrl, setProfileUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Setup intersection observers for animations
@@ -59,21 +57,6 @@ const Index = () => {
       observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
-
-  const handleProfileUpload = (url: string) => {
-    console.log("Profile picture uploaded:", url);
-    setProfileUrl(url);
-    // Save to user profile or local storage here
-    localStorage.setItem('profilePicture', url);
-  };
-
-  // Load profile picture from local storage on mount
-  useEffect(() => {
-    const savedProfileUrl = localStorage.getItem('profilePicture');
-    if (savedProfileUrl) {
-      setProfileUrl(savedProfileUrl);
-    }
   }, []);
 
   // Different animation variants for each section
@@ -151,16 +134,8 @@ const Index = () => {
       <AnimatedBackground />
       
       <header className="sticky top-0 z-50 glass-morphism">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Navbar />
-          <div className="py-2">
-            <ProfilePicture
-              url={profileUrl}
-              size="sm"
-              onUpload={handleProfileUpload}
-              className="animate-float"
-            />
-          </div>
         </div>
       </header>
 
