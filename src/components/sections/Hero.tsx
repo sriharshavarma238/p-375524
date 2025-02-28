@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -107,7 +106,7 @@ export const Hero = () => {
           />
         </picture>
         <div 
-          className="absolute inset-0 bg-black/40"
+          className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
           style={{
             backdropFilter: 'contrast(1.2) brightness(0.8)'
           }}

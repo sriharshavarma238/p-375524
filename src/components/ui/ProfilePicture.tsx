@@ -69,6 +69,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       
       const progressInterval = simulateProgress();
 
+      // Check if bucket exists, and attempt upload
       const { error: uploadError, data } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
@@ -90,9 +91,10 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       });
 
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: error.message,
+        description: error.message || "Could not upload your profile picture. Please try again.",
         variant: "destructive"
       });
     } finally {

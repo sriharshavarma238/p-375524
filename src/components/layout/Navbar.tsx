@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/utils/scrollUtils";
-import { UserCircle, Loader, Camera, Upload } from "lucide-react";
+import { UserCircle, Loader } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserProfileMenu } from "@/components/ui/UserProfileMenu";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
@@ -20,6 +20,7 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isOverHeroSection, setIsOverHeroSection] = useState(true);
+  const [isOverDarkSection, setIsOverDarkSection] = useState(true);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -78,21 +79,55 @@ export const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
+      // Get the element at the center of the viewport
       const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
+      
+      // Check if we're over hero section
       const isHero = elements.some(element => {
         const isHeroSection = (el: Element): boolean => {
           if (!el) return false;
-          if (el.tagName.toLowerCase() === 'section' && el.querySelector('h1')?.textContent?.includes('Scaling Enterprises')) {
+          if (el.id === 'home') {
             return true;
           }
           return el.parentElement ? isHeroSection(el.parentElement) : false;
         };
         return isHeroSection(element);
       });
+      
+      // Check background color using computed styles
+      const isDark = elements.some(element => {
+        // Check if the background is dark
+        const style = window.getComputedStyle(element);
+        const bgColor = style.backgroundColor;
+        
+        // If element has a background color
+        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+          // Convert rgb(a) to values
+          const rgb = bgColor.match(/\d+/g);
+          if (rgb && rgb.length >= 3) {
+            const [r, g, b] = rgb.map(Number);
+            // Calculate brightness (perceived brightness formula)
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            // If brightness < 128, it's dark
+            return brightness < 128;
+          }
+        }
+        
+        // Check for dark glass-morphism and gradient backgrounds
+        return element.classList.contains('glass-morphism') || 
+               element.classList.contains('bg-gradient-to-b') ||
+               element.classList.contains('from-[#000000]') ||
+               element.classList.contains('to-[#000000]') ||
+               element.classList.contains('via-[#1a1a1a]');
+      });
+
       setIsOverHeroSection(isHero);
+      setIsOverDarkSection(isDark);
     };
+    
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
+    handleScroll(); // Initial check
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -269,10 +304,11 @@ export const Navbar = () => {
     }
   };
 
-  const textColorClass = isOverHeroSection ? 'text-white' : 'text-gray-800';
+  // Determine text color based on background
+  const textColorClass = isOverDarkSection ? 'text-white' : 'text-gray-800';
 
   return <>
-    <nav className="fixed top-0 left-0 right-0 z-50 w-full">
+    <nav className="fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto px-4 md:px-16 h-[72px] flex items-center justify-between glass-morphism">
         <div className="flex items-center gap-8 w-full justify-between md:justify-start">
           <Link to="/" className="flex-shrink-0 transform hover:scale-105 transition-transform duration-200">
@@ -317,13 +353,13 @@ export const Navbar = () => {
                   user={user}
                   profileUrl={profileUrl}
                   onProfileUpload={handleProfileUpload}
-                  textColorClass={isOverHeroSection ? 'text-white' : 'text-gray-900'}
+                  textColorClass={isOverDarkSection ? 'text-white' : 'text-gray-900'}
                   onLogout={handleLogout}
                 />
               </div>
             ) : (
               <>
-                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHeroSection} className="transform hover:scale-105 transition-all duration-200">
+                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverDarkSection} className="transform hover:scale-105 transition-all duration-200">
                   Log in
                 </ActionButton>
                 <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
