@@ -299,7 +299,7 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8 text-base">
             <button onClick={() => handleNavigation('home')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-              <span className="relative z-10 text-slate-50">Home</span>
+              <span className="relative z-10 text-inherit">Home</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
             <button onClick={() => handleNavigation('features')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
