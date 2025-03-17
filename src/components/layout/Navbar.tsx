@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -15,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { UserProfileMenu } from "@/components/ui/UserProfileMenu";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { motion, AnimatePresence } from "framer-motion";
-
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
@@ -40,16 +38,20 @@ export const Navbar = () => {
     email: "",
     password: ""
   });
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     // Try to load the profile picture from storage on component mount
     const savedProfileUrl = localStorage.getItem('profilePicture');
     if (savedProfileUrl) {
       setProfileUrl(savedProfileUrl);
     }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       if (session?.user) {
         setUser(session.user);
         // If user has a profile picture in their metadata, use it
@@ -58,9 +60,10 @@ export const Navbar = () => {
         }
       }
     });
-
     const {
-      data: { subscription },
+      data: {
+        subscription
+      }
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
@@ -73,15 +76,13 @@ export const Navbar = () => {
         setProfileUrl(undefined);
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
-
   useEffect(() => {
     const handleScroll = () => {
       // Get the element at the center of the viewport
       const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
-      
+
       // Check if we're over home section
       const isHomeSection = elements.some(element => {
         const isHome = (el: Element): boolean => {
@@ -93,7 +94,7 @@ export const Navbar = () => {
         };
         return isHome(element);
       });
-      
+
       // Check if we're over solutions section
       const isSolutionsSection = elements.some(element => {
         const isSolutions = (el: Element): boolean => {
@@ -105,34 +106,32 @@ export const Navbar = () => {
         };
         return isSolutions(element);
       });
-      
+
       // Update state based on which section we're over
       setIsOverHomeSection(isHomeSection);
       setIsOverSolutionsSection(isSolutionsSection);
     };
-    
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const handleProfileUpload = async (url: string) => {
     setProfileUrl(url);
     localStorage.setItem('profilePicture', url);
-    
+
     // If user is logged in, update their profile in Supabase
     if (user) {
       try {
-        const { error } = await supabase.auth.updateUser({
-          data: { 
+        const {
+          error
+        } = await supabase.auth.updateUser({
+          data: {
             ...user.user_metadata,
-            avatar_url: url 
+            avatar_url: url
           }
         });
-        
         if (error) throw error;
-        
         toast({
           title: "Profile updated",
           description: "Your profile picture has been updated successfully."
@@ -146,32 +145,28 @@ export const Navbar = () => {
       }
     }
   };
-
   const handleGetStarted = () => {
     setIsSignUpOpen(true);
   };
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       // Clear profile picture from local storage
       localStorage.removeItem('profilePicture');
       setProfileUrl(undefined);
-      
       toast({
         title: "Logged out successfully",
-        description: "You have been logged out of your account.",
+        description: "You have been logged out of your account."
       });
       navigate('/');
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to log out. Please try again.",
+        description: "Failed to log out. Please try again."
       });
     }
   };
-
   const handleNavigation = (sectionId: string) => {
     if (location.pathname !== '/') {
       window.location.href = `/?section=${sectionId}`;
@@ -180,7 +175,6 @@ export const Navbar = () => {
       setIsMenuOpen(false);
     }
   };
-
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password.length < 8) {
@@ -207,13 +201,10 @@ export const Navbar = () => {
           }
         }
       });
-
       console.log("Signup response:", signUpData, signUpError);
-      
       if (signUpError) {
         throw signUpError;
       }
-      
       if (signUpData.user) {
         toast({
           title: "Account Created Successfully",
@@ -238,7 +229,6 @@ export const Navbar = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       name,
@@ -249,12 +239,10 @@ export const Navbar = () => {
       [name]: value
     }));
   };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
     setLoginError(false);
-    
     try {
       console.log("Attempting login with:", loginData.email);
       const {
@@ -264,9 +252,7 @@ export const Navbar = () => {
         email: loginData.email,
         password: loginData.password
       });
-      
       console.log("Login response:", data, error);
-      
       if (error) {
         setLoginError(true);
         toast({
@@ -276,13 +262,12 @@ export const Navbar = () => {
         });
         return;
       }
-      
+
       // Check if user has a profile picture
       if (data?.user?.user_metadata?.avatar_url) {
         setProfileUrl(data.user.user_metadata.avatar_url);
         localStorage.setItem('profilePicture', data.user.user_metadata.avatar_url);
       }
-      
       setShowLoginModal(false);
       toast({
         title: "Welcome back!",
@@ -304,7 +289,6 @@ export const Navbar = () => {
   // Determine text color based on which section we're over
   // Default color is white, changes to black if not over home or solutions
   const textColorClass = isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-800';
-
   return <>
     <nav className="fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto px-4 md:px-16 h-[72px] flex items-center justify-between glass-morphism">
@@ -315,7 +299,7 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8 text-base">
             <button onClick={() => handleNavigation('home')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-              <span className="relative z-10">Home</span>
+              <span className="relative z-10 text-slate-50">Home</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
             <button onClick={() => handleNavigation('features')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
@@ -345,26 +329,16 @@ export const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4 ml-auto">
-            {user ? (
-              <div className="flex items-center">
-                <UserProfileMenu 
-                  user={user}
-                  profileUrl={profileUrl}
-                  onProfileUpload={handleProfileUpload}
-                  textColorClass={isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-900'}
-                  onLogout={handleLogout}
-                />
-              </div>
-            ) : (
-              <>
+            {user ? <div className="flex items-center">
+                <UserProfileMenu user={user} profileUrl={profileUrl} onProfileUpload={handleProfileUpload} textColorClass={isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-900'} onLogout={handleLogout} />
+              </div> : <>
                 <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHomeSection || isOverSolutionsSection} className="transform hover:scale-105 transition-all duration-200">
                   Log in
                 </ActionButton>
                 <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
                   Get Started
                 </ActionButton>
-              </>
-            )}
+              </>}
           </div>
 
           <Sheet>
@@ -392,31 +366,16 @@ export const Navbar = () => {
                 <Link to="/pricing" className="text-lg text-left py-2 hover:text-gray-600 transition-colors duration-200">
                   Pricing
                 </Link>
-                {user ? (
-                  <div className="border rounded-lg p-4 bg-gray-50">
-                    <UserProfileMenu 
-                      user={user}
-                      profileUrl={profileUrl}
-                      onProfileUpload={handleProfileUpload}
-                      textColorClass="text-gray-900"
-                      onLogout={handleLogout}
-                      isMobile={true}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4 mt-4">
+                {user ? <div className="border rounded-lg p-4 bg-gray-50">
+                    <UserProfileMenu user={user} profileUrl={profileUrl} onProfileUpload={handleProfileUpload} textColorClass="text-gray-900" onLogout={handleLogout} isMobile={true} />
+                  </div> : <div className="flex flex-col gap-4 mt-4">
                     <ActionButton onClick={handleGetStarted} className="w-full transform hover:scale-105 transition-all duration-200">
                       Get Started
                     </ActionButton>
-                    <ActionButton 
-                      onClick={() => setShowLoginModal(true)} 
-                      variant="cyan"
-                      className="w-full transform hover:scale-105 transition-all duration-200"
-                    >
+                    <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" className="w-full transform hover:scale-105 transition-all duration-200">
                       Log in
                     </ActionButton>
-                  </div>
-                )}
+                  </div>}
               </div>
             </SheetContent>
           </Sheet>
