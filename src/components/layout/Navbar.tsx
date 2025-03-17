@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { UserProfileMenu } from "@/components/ui/UserProfileMenu";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { motion, AnimatePresence } from "framer-motion";
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
@@ -41,8 +42,8 @@ export const Navbar = () => {
   const {
     toast
   } = useToast();
+
   useEffect(() => {
-    // Try to load the profile picture from storage on component mount
     const savedProfileUrl = localStorage.getItem('profilePicture');
     if (savedProfileUrl) {
       setProfileUrl(savedProfileUrl);
@@ -54,7 +55,6 @@ export const Navbar = () => {
     }) => {
       if (session?.user) {
         setUser(session.user);
-        // If user has a profile picture in their metadata, use it
         if (session.user.user_metadata?.avatar_url) {
           setProfileUrl(session.user.user_metadata.avatar_url);
         }
@@ -67,7 +67,6 @@ export const Navbar = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        // If user has a profile picture in their metadata, use it
         if (session.user.user_metadata?.avatar_url) {
           setProfileUrl(session.user.user_metadata.avatar_url);
         }
@@ -78,12 +77,11 @@ export const Navbar = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
   useEffect(() => {
     const handleScroll = () => {
-      // Get the element at the center of the viewport
       const elements = document.elementsFromPoint(window.innerWidth / 2, 70);
 
-      // Check if we're over home section
       const isHomeSection = elements.some(element => {
         const isHome = (el: Element): boolean => {
           if (!el) return false;
@@ -95,7 +93,6 @@ export const Navbar = () => {
         return isHome(element);
       });
 
-      // Check if we're over solutions section
       const isSolutionsSection = elements.some(element => {
         const isSolutions = (el: Element): boolean => {
           if (!el) return false;
@@ -107,20 +104,19 @@ export const Navbar = () => {
         return isSolutions(element);
       });
 
-      // Update state based on which section we're over
       setIsOverHomeSection(isHomeSection);
       setIsOverSolutionsSection(isSolutionsSection);
     };
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const handleProfileUpload = async (url: string) => {
     setProfileUrl(url);
     localStorage.setItem('profilePicture', url);
 
-    // If user is logged in, update their profile in Supabase
     if (user) {
       try {
         const {
@@ -145,13 +141,14 @@ export const Navbar = () => {
       }
     }
   };
+
   const handleGetStarted = () => {
     setIsSignUpOpen(true);
   };
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      // Clear profile picture from local storage
       localStorage.removeItem('profilePicture');
       setProfileUrl(undefined);
       toast({
@@ -167,6 +164,7 @@ export const Navbar = () => {
       });
     }
   };
+
   const handleNavigation = (sectionId: string) => {
     if (location.pathname !== '/') {
       window.location.href = `/?section=${sectionId}`;
@@ -175,6 +173,7 @@ export const Navbar = () => {
       setIsMenuOpen(false);
     }
   };
+
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password.length < 8) {
@@ -229,6 +228,7 @@ export const Navbar = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       name,
@@ -239,6 +239,7 @@ export const Navbar = () => {
       [name]: value
     }));
   };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -263,7 +264,6 @@ export const Navbar = () => {
         return;
       }
 
-      // Check if user has a profile picture
       if (data?.user?.user_metadata?.avatar_url) {
         setProfileUrl(data.user.user_metadata.avatar_url);
         localStorage.setItem('profilePicture', data.user.user_metadata.avatar_url);
@@ -286,9 +286,8 @@ export const Navbar = () => {
     }
   };
 
-  // Determine text color based on which section we're over
-  // Default color is white, changes to black if not over home or solutions
-  const textColorClass = isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-800';
+  const textColorClass = !isOverHomeSection && !isOverSolutionsSection ? 'text-gray-800' : 'text-white';
+
   return <>
     <nav className="fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto px-4 md:px-16 h-[72px] flex items-center justify-between glass-morphism">
@@ -299,7 +298,7 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8 text-base">
             <button onClick={() => handleNavigation('home')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
-              <span className="relative z-10 text-inherit">Home</span>
+              <span className="relative z-10">Home</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-current transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
             </button>
             <button onClick={() => handleNavigation('features')} className={`relative group ${textColorClass} transition-all duration-300 ease-in-out`}>
@@ -330,7 +329,7 @@ export const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-4 ml-auto">
             {user ? <div className="flex items-center">
-                <UserProfileMenu user={user} profileUrl={profileUrl} onProfileUpload={handleProfileUpload} textColorClass={isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-900'} onLogout={handleLogout} />
+                <UserProfileMenu user={user} profileUrl={profileUrl} onProfileUpload={handleProfileUpload} textColorClass={!isOverHomeSection && !isOverSolutionsSection ? 'text-gray-900' : 'text-white'} onLogout={handleLogout} />
               </div> : <>
                 <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHomeSection || isOverSolutionsSection} className="transform hover:scale-105 transition-all duration-200">
                   Log in
