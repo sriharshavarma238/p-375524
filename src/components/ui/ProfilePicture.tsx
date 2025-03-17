@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Check } from 'lucide-react';
+import { Camera, Upload, Check, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 interface ProfilePictureProps {
   url?: string;
   onUpload: (url: string) => void;
+  onRemove?: () => void;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -16,6 +17,7 @@ interface ProfilePictureProps {
 export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   url,
   onUpload,
+  onRemove,
   size = 'md',
   className,
 }) => {
@@ -69,6 +71,8 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       
       const progressInterval = simulateProgress();
 
+      console.log("Uploading to storage bucket", filePath);
+
       // Check if bucket exists, and attempt upload
       const { error: uploadError, data } = await supabase.storage
         .from('avatars')
@@ -77,12 +81,16 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error details:", uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
+      console.log("Upload successful, public URL:", publicUrl);
       onUpload(publicUrl);
       
       toast({
@@ -181,19 +189,48 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
               initial="initial"
               animate="hover"
               exit="initial"
-              onClick={() => fileInputRef.current?.click()}
               style={{
                 background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%)`
               }}
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <Upload className="w-1/4 h-1/4 text-white" />
-              </motion.div>
+              {url && onRemove ? (
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="p-2 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-5 h-5 text-white" />
+                  </motion.div>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
+                    className="p-2 bg-red-500 rounded-full cursor-pointer hover:bg-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove();
+                    }}
+                  >
+                    <Trash2 className="w-5 h-5 text-white" />
+                  </motion.div>
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="flex items-center justify-center"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-1/4 h-1/4 text-white" />
+                </motion.div>
+              )}
             </motion.div>
           )}
 

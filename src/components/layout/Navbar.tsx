@@ -19,8 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
-  const [isOverHeroSection, setIsOverHeroSection] = useState(true);
-  const [isOverSpecialSection, setIsOverSpecialSection] = useState(true);
+  const [isOverHomeSection, setIsOverHomeSection] = useState(true);
+  const [isOverSolutionsSection, setIsOverSolutionsSection] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -107,8 +107,8 @@ export const Navbar = () => {
       });
       
       // Update state based on which section we're over
-      setIsOverHeroSection(isHomeSection);
-      setIsOverSpecialSection(isHomeSection || isSolutionsSection);
+      setIsOverHomeSection(isHomeSection);
+      setIsOverSolutionsSection(isSolutionsSection);
     };
     
     window.addEventListener('scroll', handleScroll);
@@ -193,6 +193,7 @@ export const Navbar = () => {
     }
     setIsSubmitting(true);
     try {
+      console.log("Attempting signup with:", formData.email);
       const {
         data: signUpData,
         error: signUpError
@@ -206,9 +207,13 @@ export const Navbar = () => {
           }
         }
       });
+
+      console.log("Signup response:", signUpData, signUpError);
+      
       if (signUpError) {
         throw signUpError;
       }
+      
       if (signUpData.user) {
         toast({
           title: "Account Created Successfully",
@@ -249,7 +254,9 @@ export const Navbar = () => {
     e.preventDefault();
     setIsLoggingIn(true);
     setLoginError(false);
+    
     try {
+      console.log("Attempting login with:", loginData.email);
       const {
         error,
         data
@@ -257,12 +264,15 @@ export const Navbar = () => {
         email: loginData.email,
         password: loginData.password
       });
+      
+      console.log("Login response:", data, error);
+      
       if (error) {
         setLoginError(true);
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: "This account doesn't exist or the credentials are incorrect."
+          description: error.message || "This account doesn't exist or the credentials are incorrect."
         });
         return;
       }
@@ -279,11 +289,12 @@ export const Navbar = () => {
         description: "You have successfully logged in."
       });
     } catch (error: any) {
+      console.error("Login error:", error);
       setLoginError(true);
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message
+        description: error.message || "An error occurred during login."
       });
     } finally {
       setIsLoggingIn(false);
@@ -291,7 +302,8 @@ export const Navbar = () => {
   };
 
   // Determine text color based on which section we're over
-  const textColorClass = isOverSpecialSection ? 'text-white' : 'text-gray-800';
+  // Default color is white, changes to black if not over home or solutions
+  const textColorClass = isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-800';
 
   return <>
     <nav className="fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-300">
@@ -339,13 +351,13 @@ export const Navbar = () => {
                   user={user}
                   profileUrl={profileUrl}
                   onProfileUpload={handleProfileUpload}
-                  textColorClass={isOverSpecialSection ? 'text-white' : 'text-gray-900'}
+                  textColorClass={isOverHomeSection || isOverSolutionsSection ? 'text-white' : 'text-gray-900'}
                   onLogout={handleLogout}
                 />
               </div>
             ) : (
               <>
-                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverSpecialSection} className="transform hover:scale-105 transition-all duration-200">
+                <ActionButton onClick={() => setShowLoginModal(true)} variant="cyan" isDarkBg={isOverHomeSection || isOverSolutionsSection} className="transform hover:scale-105 transition-all duration-200">
                   Log in
                 </ActionButton>
                 <ActionButton onClick={handleGetStarted} className="transform hover:scale-105 transition-all duration-200 hover:shadow-lg">
@@ -413,31 +425,31 @@ export const Navbar = () => {
     </nav>
 
     <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white text-gray-900">
         <DialogHeader>
-          <DialogTitle>Create an Account</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Create an Account</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Fill in your details to create your account and get started.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSignUpSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name" className="text-gray-800">Full Name</Label>
             <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="John Doe" required disabled={isSubmitting} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email" className="text-gray-800">Email Address</Label>
             <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" required disabled={isSubmitting} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-gray-800">Password</Label>
             <Input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="Enter your password" required minLength={8} disabled={isSubmitting} />
             <p className="text-xs text-gray-500">
               Password must be at least 8 characters long
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="company">Company Name</Label>
+            <Label htmlFor="company" className="text-gray-800">Company Name</Label>
             <Input id="company" name="company" value={formData.company} onChange={handleInputChange} placeholder="Acme Inc." required disabled={isSubmitting} />
           </div>
           <ActionButton type="submit" className="w-full" disabled={isSubmitting}>
@@ -448,24 +460,24 @@ export const Navbar = () => {
     </Dialog>
 
     <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-      <DialogContent className={cn("sm:max-w-[425px] transition-transform duration-200", loginError && "animate-shake")}>
+      <DialogContent className={cn("sm:max-w-[425px] transition-transform duration-200 bg-white text-gray-900", loginError && "animate-shake")}>
         <DialogHeader>
-          <DialogTitle>Login to Your Account</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Login to Your Account</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Enter your credentials to access your account.
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleLogin} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-gray-800">Email</Label>
             <Input id="email" type="email" value={loginData.email} onChange={e => setLoginData({
               ...loginData,
               email: e.target.value
             })} placeholder="Enter your email" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-gray-800">Password</Label>
             <Input id="password" type="password" value={loginData.password} onChange={e => setLoginData({
               ...loginData,
               password: e.target.value

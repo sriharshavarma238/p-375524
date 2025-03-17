@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { UserCircle, Settings, LogOut, Building, Mail, CalendarIcon, CreditCard, User, Upload } from "lucide-react";
+import { UserCircle, Settings, LogOut, Building, Mail, CalendarIcon, CreditCard, User, Upload, Trash2 } from "lucide-react";
 import { formatDistance, format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,6 +125,39 @@ export const UserProfileMenu = ({
       }));
     }
   };
+
+  const handleRemoveProfilePicture = async () => {
+    try {
+      // Remove the profile picture URL from user metadata
+      if (user) {
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            ...user.user_metadata,
+            avatar_url: null
+          }
+        });
+        
+        if (error) throw error;
+      }
+      
+      // Remove the profile picture from local storage
+      localStorage.removeItem('profilePicture');
+      
+      // Update the profile picture state to undefined
+      onProfileUpload('');
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile picture has been removed successfully."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to remove profile picture",
+        variant: "destructive"
+      });
+    }
+  };
   
   return (
     <>
@@ -136,6 +169,7 @@ export const UserProfileMenu = ({
                 url={profileUrl}
                 size="sm"
                 onUpload={onProfileUpload}
+                onRemove={handleRemoveProfilePicture}
                 className="cursor-pointer transition-transform hover:scale-105"
               />
             </div>
@@ -176,6 +210,7 @@ export const UserProfileMenu = ({
                 url={profileUrl}
                 size="sm"
                 onUpload={onProfileUpload}
+                onRemove={handleRemoveProfilePicture}
                 className="cursor-pointer transition-transform group-hover:scale-105"
               />
             </div>
@@ -229,15 +264,15 @@ export const UserProfileMenu = ({
       )}
 
       <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
-        <DialogContent className="sm:max-w-[425px] p-6 bg-white text-gray-900 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[425px] p-6 bg-white text-gray-900 max-h-[85vh] overflow-y-auto">
           <DialogHeader className="mb-4">
-            <DialogTitle className="flex items-center justify-between pr-8">
+            <DialogTitle className="flex items-center justify-between pr-8 text-gray-900">
               <span>Personal Information</span>
               {!isEditing && (
                 <Button 
                   variant="outline" 
                   onClick={() => setIsEditing(true)}
-                  className="text-sm"
+                  className="text-sm text-white bg-blue-600 hover:bg-blue-700 border-blue-600"
                 >
                   Edit Profile
                 </Button>
@@ -251,6 +286,7 @@ export const UserProfileMenu = ({
                 url={profileUrl}
                 size="lg"
                 onUpload={onProfileUpload}
+                onRemove={handleRemoveProfilePicture}
                 className="cursor-pointer"
               />
             </div>
